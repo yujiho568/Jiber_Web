@@ -3,6 +3,7 @@ package com.jiber.backend.property;
 import com.jiber.backend.common.PageMetadata;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -10,10 +11,20 @@ public class PropertyService {
 
     private final PropertyAiEligibilityService eligibilityService;
     private final PropertyValuationClient valuationClient;
+    private final Function<Long, PropertyType> propertyTypeResolver;
 
     public PropertyService(PropertyAiEligibilityService eligibilityService, PropertyValuationClient valuationClient) {
+        this(eligibilityService, valuationClient, propertyId -> PropertyType.APARTMENT);
+    }
+
+    PropertyService(
+            PropertyAiEligibilityService eligibilityService,
+            PropertyValuationClient valuationClient,
+            Function<Long, PropertyType> propertyTypeResolver
+    ) {
         this.eligibilityService = eligibilityService;
         this.valuationClient = valuationClient;
+        this.propertyTypeResolver = propertyTypeResolver;
     }
 
     public PropertyMapResponse findMapProperties(MapSearchRequest request) {
@@ -55,6 +66,6 @@ public class PropertyService {
     }
 
     private PropertyType resolvePropertyTypeForAi(Long propertyId) {
-        return PropertyType.APARTMENT;
+        return propertyTypeResolver.apply(propertyId);
     }
 }

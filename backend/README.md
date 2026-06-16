@@ -54,6 +54,8 @@ mvn test
 - `OAUTH_NAVER_CLIENT_SECRET`
 - `MODEL_SERVER_BASE_URL`
 - `MODEL_SERVER_INTERNAL_TOKEN`
+- `MODEL_SERVER_CONNECT_TIMEOUT_MS`
+- `MODEL_SERVER_READ_TIMEOUT_MS`
 - `MODEL_VERSION`
 - `MODEL_BASELINE_DATE`
 - `MODEL_FEATURE_SET_VERSION`
@@ -80,7 +82,7 @@ mvn test
 - OAuth2 client registration과 provider secret 주입
 - refresh token reuse 감지 시 session family revocation SQL의 실제 MySQL 통합 검증
 - 현재 로그인 사용자 주입과 favorite ownership 검증
-- 실제 model-server HTTP 호출
+- model-server feature mapping의 실제 DB/거래 데이터 기반 보강
 - 공지사항 작성자/수정자 기록
 
 ## Auth / Security Handoff
@@ -137,8 +139,24 @@ OAuth 성공 후 backend는 refresh cookie를 설정하고 `FRONTEND_PUBLIC_BASE
 
 - 프론트엔드는 model-server를 직접 호출하지 않습니다.
 - Spring Boot만 내부적으로 `MODEL_SERVER_BASE_URL`의 `/internal/v1/**`를 호출해야 합니다.
-- `PropertyValuationClient`는 Phase 1 skeleton입니다. 다음 단계에서 model-server contract에 맞는 HTTP client로 교체하세요.
+- `PropertyValuationClient` 구현체는 `ModelServerPropertyValuationClient`입니다.
+- HTTP client는 Spring Framework 6.1의 blocking `RestClient`를 사용합니다. 현재 backend는 MVC/blocking stack이므로 WebFlux 의존성을 추가하지 않고 `spring-boot-starter-web` 안에서 해결할 수 있기 때문입니다.
+- valuation은 `POST /internal/v1/valuation/apartments`, SHAP은 `POST /internal/v1/shap/apartments`를 호출합니다.
+- `MODEL_SERVER_INTERNAL_TOKEN` 또는 `jiber.model-server.internal-token` 값이 있으면 `Authorization: Bearer <token>` header를 추가합니다. token 값은 로그에 남기지 않습니다.
+- `MODEL_SERVER_CONNECT_TIMEOUT_MS`, `MODEL_SERVER_READ_TIMEOUT_MS`로 연결/응답 timeout을 조정할 수 있습니다. 기본값은 각각 `2000`, `5000`입니다.
+- model-server `supported=false`, `reason=INSUFFICIENT_DATA`, `missingFeatures` 응답은 public API에서 `VALUATION_INSUFFICIENT_DATA`로 변환합니다.
+- model-server 연결 실패, 5xx, timeout, 잘못된 internal auth 등 RestClient 예외는 `MODEL_SERVER_UNAVAILABLE`로 변환합니다.
 - 비아파트 valuation/shap은 `PropertyAiEligibilityService`에서 `VALUATION_UNSUPPORTED_PROPERTY_TYPE`으로 처리하는 경로를 유지해야 합니다.
+
+### Phase 1 Feature Mapping Skeleton
+
+현재 DB query가 없으므로 `ModelServerApartmentFeatureMapper`는 public request와 고정 skeleton 값을 조합합니다.
+
+- public request에서 전달: `propertyId`, `asOfDate`, `exclusiveAreaM2`, `floor`
+- `asOfDate`에서 계산: `dealYear`, `dealMonth`
+- Phase 1 skeleton default: `sido=서울특별시`, `sigungu=강남구`, `legalDong=예시동`, `builtYear=2010`, `distanceToStationM=420`
+
+다음 Backend/Data 작업에서 `properties`, `property_transactions`, 교통/인프라 데이터 기반으로 위 feature를 채워야 합니다. feature 이름은 `docs/contracts/model-server.md`와 `model-server/app/schemas/apartment.py`의 camelCase 필드를 유지합니다.
 
 ## Database
 

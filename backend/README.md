@@ -206,6 +206,8 @@ cp .env.example .env
 docker compose up -d mysql
 ```
 
+호스트의 3306 포트를 이미 다른 MySQL이 사용 중이면 `.env`의 `DB_PORT`를 예: `3307`로 바꾼 뒤 실행합니다. Spring Boot smoke test도 같은 `DB_PORT` 값으로 실행해야 Docker MySQL을 조회합니다.
+
 처음 생성되는 Docker volume에는 `db/`의 SQL 파일이 파일명 순서대로 적용됩니다.
 
 ```text

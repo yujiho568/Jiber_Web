@@ -336,6 +336,17 @@ input[type="range"] {
   background: #e8edf3;
 }
 
+.map-panel.is-ready {
+  background: #dbeafe;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .map-grid {
   position: absolute;
   inset: 0;
@@ -383,6 +394,20 @@ input[type="range"] {
   background: rgba(255, 255, 255, 0.94);
 }
 
+.map-status {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .section-title {
   justify-content: space-between;
   gap: 12px;
@@ -414,6 +439,11 @@ input[type="range"] {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+}
+
+.result-list li.is-selected {
+  border-color: var(--brand);
+  background: #eff6ff;
 }
 
 .result-list a,

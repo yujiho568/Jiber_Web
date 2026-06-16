@@ -30,6 +30,8 @@ VITE_KAKAO_MAP_APP_KEY=
 - `VITE_API_BASE_URL`: Spring Boot public API base URL입니다. 프론트엔드는 `/api/v1/**`만 호출합니다.
 - `VITE_KAKAO_MAP_APP_KEY`: Kakao Maps JavaScript app key입니다. 비어 있으면 지도 fallback 안내를 보여줍니다.
 
+Vite는 frontend 앱 실행 시점의 env만 주입합니다. 루트 `.env`를 그대로 복사하지 말고, `frontend/.env`를 만들거나 실행 환경에서 `VITE_API_BASE_URL`, `VITE_KAKAO_MAP_APP_KEY`를 process env로 주입해 주세요.
+
 ## Auth Token 저장 정책
 
 - access token은 Pinia auth store의 메모리 상태에만 저장합니다.
@@ -44,12 +46,12 @@ VITE_KAKAO_MAP_APP_KEY=
 - Pinia memory-only auth store와 `USER`, `ADMIN` route guard
 - Axios API client와 공통 error response 타입
 - property, favorites, notices, auth API module skeleton
-- Kakao Maps loader skeleton과 key 누락 fallback
+- Kakao Maps loader, 실제 지도 인스턴스, bounds 기반 검색, marker 렌더링, key 누락 fallback
 - ECharts 거래 차트와 SHAP 요인 차트 placeholder
 
 ## 아직 Skeleton인 부분
 
-- Kakao Maps 실제 지도 인스턴스 생성, marker, cluster, bounds 이벤트 연결
+- Kakao marker clustering, marker 커스텀 오버레이, 지도 검색 성능 최적화
 - 상세 화면의 실제 valuation/shap 입력 폼 세분화
 - 즐겨찾기 추가/삭제 버튼의 실제 화면 연결
 - 공지사항 상세 화면과 관리자 수정/삭제 화면

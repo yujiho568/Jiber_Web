@@ -37,6 +37,7 @@ mvn test
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASSWORD`
+- `DB_ROOT_PASSWORD`
 - `PUBLIC_DATA_SERVICE_KEY`
 - `KAKAO_REST_API_KEY`
 - `PUBLIC_DATA_IMPORT_MONTHS`
@@ -81,6 +82,7 @@ mvn test
 - `GET /api/v1/auth/me`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout` skeleton
 - OAuth2 login success handler skeleton
 - property, favorite, notice controller/DTO/service skeleton
+- property map/search/detail API의 canonical table 기반 MyBatis 조회 skeleton
 - Springdoc OpenAPI 설정
 - MyBatis mapper 위치 설정
 - 공공데이터포털 아파트 실거래 import batch skeleton
@@ -88,7 +90,7 @@ mvn test
 
 아직 mock/skeleton인 부분:
 
-- MyBatis mapper query의 DB 통합 검증
+- Property map/search/detail MyBatis mapper query의 실제 MySQL 통합 검증
 - OAuth2 client registration과 provider secret 주입
 - refresh token reuse 감지 시 session family revocation SQL의 실제 MySQL 통합 검증
 - 현재 로그인 사용자 주입과 favorite ownership 검증
@@ -193,6 +195,47 @@ schema 초안은 `../db/001_phase1_schema.sql`입니다.
 - `public_data_geocoding_cache`: `sido + sigungu + legalDong + jibun` 주소 조합별 Kakao geocoding 상태와 좌표 cache.
 
 로컬 개발에서는 Docker MySQL 또는 로컬 MySQL 중 편한 방식을 사용할 수 있습니다. 운영에서는 Docker MySQL 고정이 아니라 managed DB 또는 운영 표준 MySQL 중 선택해야 합니다.
+
+### Local Docker MySQL
+
+루트 `compose.yaml`은 MySQL 8 로컬 개발용입니다. 실제 DB 비밀번호는 `.env`에만 둡니다.
+
+```bash
+cp .env.example .env
+# .env에서 DB_PASSWORD, DB_ROOT_PASSWORD를 로컬 값으로 채웁니다.
+docker compose up -d mysql
+```
+
+처음 생성되는 Docker volume에는 `db/`의 SQL 파일이 파일명 순서대로 적용됩니다.
+
+```text
+db/001_phase1_schema.sql
+db/002_public_data_import.sql
+db/003_seed_sample_properties.sql
+```
+
+이미 volume이 존재하는 상태에서 seed를 다시 적용하려면 `.env`를 로드한 뒤 필요한 SQL만 직접 실행합니다.
+
+```bash
+set -a
+source .env
+set +a
+docker compose exec -T mysql mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < db/003_seed_sample_properties.sql
+```
+
+`db/003_seed_sample_properties.sql`은 지도 검색, 필터 검색, 상세 조회 smoke test용 synthetic seed입니다. 실거래 원천 데이터나 투자 판단 근거로 사용하지 않습니다.
+
+### Property API Smoke Examples
+
+Spring Boot를 실행한 뒤 seed 데이터로 다음 public read API를 확인할 수 있습니다.
+
+```bash
+curl "http://localhost:8080/api/v1/properties/map?swLat=37.40&swLng=126.90&neLat=37.60&neLng=127.20&zoomLevel=5&propertyTypes=APARTMENT&transactionTypes=SALE"
+curl "http://localhost:8080/api/v1/properties/search?sido=서울특별시&sigungu=강남구&page=0&size=10&sort=latestDealDate,desc"
+curl "http://localhost:8080/api/v1/properties/1001"
+```
+
+지도 검색은 `latitude`, `longitude`가 있는 canonical `properties` row만 노출합니다. 향후 public data batch의 Kakao geocoding 성공 건만 canonical upsert 대상으로 삼는 정책을 유지해야 합니다.
 
 ## Public Data Import Batch
 

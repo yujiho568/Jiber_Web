@@ -34,17 +34,19 @@ docs/
 .agents/        프로젝트 로컬 Codex 에이전트 정의
 ```
 
-## 로컬 실행 예정 방식
+## 로컬 실행 방식
 
-Phase 1 backend/model-server skeleton 이후 다음 흐름을 목표로 합니다.
+Phase 1 로컬 개발 흐름은 다음 순서입니다.
 
-1. MySQL을 로컬 또는 Docker Compose로 실행합니다.
-2. `backend/`에서 Spring Boot API 서버를 실행합니다.
-3. `model-server/`에서 FastAPI 모델 서버를 실행합니다.
-4. `frontend/`에서 Vite 개발 서버를 실행합니다.
-5. 프론트엔드는 Spring Boot API의 `/api/v1/**`만 호출하고, Spring Boot가 내부적으로 모델 서버를 호출합니다.
+1. `.env.example`을 `.env`로 복사하고 `DB_PASSWORD`, `DB_ROOT_PASSWORD`를 로컬 값으로 채웁니다.
+2. `docker compose up -d mysql`로 MySQL 8을 실행합니다.
+3. 처음 생성되는 Docker volume에는 `db/001_phase1_schema.sql`, `db/002_public_data_import.sql`, `db/003_seed_sample_properties.sql`이 순서대로 적용됩니다.
+4. `backend/`에서 Spring Boot API 서버를 실행합니다.
+5. `model-server/`에서 FastAPI 모델 서버를 실행합니다.
+6. `frontend/`에서 Vite 개발 서버를 실행합니다.
+7. 프론트엔드는 Spring Boot API의 `/api/v1/**`만 호출하고, Spring Boot가 내부적으로 모델 서버를 호출합니다.
 
-공공데이터포털 실거래 import는 backend batch runner로 실행합니다. 로컬 개발에서는 Docker MySQL 또는 로컬 MySQL을 사용할 수 있고, 운영에서는 Docker MySQL 또는 managed DB 중 운영 기준에 맞게 선택합니다. 실제 public data service key와 Kakao REST API key는 `.env`에만 둡니다.
+공공데이터포털 실거래 import는 backend batch runner로 실행합니다. 현재 seed 데이터는 map/search/detail API smoke test용 synthetic 데이터이며, live public data import와 Kakao geocoding은 별도 실행 단계입니다. 로컬 개발에서는 Docker MySQL 또는 로컬 MySQL을 사용할 수 있고, 운영에서는 Docker MySQL 또는 managed DB 중 운영 기준에 맞게 선택합니다. 실제 public data service key와 Kakao REST API key는 `.env`에만 둡니다.
 
 실제 API 키, OAuth client secret, JWT secret, DB 비밀번호는 저장소에 커밋하지 않습니다. 필요한 환경 변수 이름은 루트 `.env.example`에만 정의합니다.
 

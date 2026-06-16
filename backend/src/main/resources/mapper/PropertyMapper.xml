@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiber.backend.property.PropertyMapper">
+    <sql id="TransactionFilters">
+        <if test="request.transactionTypes != null and request.transactionTypes.size() &gt; 0">
+            AND t.transaction_type IN
+            <foreach collection="request.transactionTypes" item="transactionType" open="(" separator="," close=")">
+                #{transactionType}
+            </foreach>
+        </if>
+        <if test="request.minDealAmount != null">
+            AND COALESCE(t.deal_amount_krw, t.deposit_amount_krw, 0) &gt;= #{request.minDealAmount}
+        </if>
+        <if test="request.maxDealAmount != null">
+            AND COALESCE(t.deal_amount_krw, t.deposit_amount_krw, 0) &lt;= #{request.maxDealAmount}
+        </if>
+        <if test="request.minAreaM2 != null">
+            AND t.exclusive_area_m2 &gt;= #{request.minAreaM2}
+        </if>
+        <if test="request.maxAreaM2 != null">
+            AND t.exclusive_area_m2 &lt;= #{request.maxAreaM2}
+        </if>
+        <if test="request.dealYearFrom != null">
+            AND YEAR(t.deal_date) &gt;= #{request.dealYearFrom}
+        </if>
+        <if test="request.dealYearTo != null">
+            AND YEAR(t.deal_date) &lt;= #{request.dealYearTo}
+        </if>
+    </sql>
+
+    <sql id="FilteredTransactionExists">
+        <if test="(request.transactionTypes != null and request.transactionTypes.size() &gt; 0)
+                or request.minDealAmount != null
+                or request.maxDealAmount != null
+                or request.minAreaM2 != null
+                or request.maxAreaM2 != null
+                or request.dealYearFrom != null
+                or request.dealYearTo != null">
+            AND EXISTS (
+                SELECT 1
+                FROM property_transactions t
+                WHERE t.property_id = p.property_id
+                <include refid="TransactionFilters"/>
+            )
+        </if>
+    </sql>
+
+    <sql id="PropertyTypeFilter">
+        <if test="request.propertyTypes != null and request.propertyTypes.size() &gt; 0">
+            AND p.property_type IN
+            <foreach collection="request.propertyTypes" item="propertyType" open="(" separator="," close=")">
+                #{propertyType}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="ListColumns">
+        p.property_id,
+        p.property_type,
+        p.name,
+        COALESCE(NULLIF(p.road_address, ''), NULLIF(p.jibun_address, ''), CONCAT_WS(' ', p.sido, p.sigungu, p.legal_dong)) AS address,
+        p.legal_dong,
+        p.latitude,
+        p.longitude,
+        (
+            SELECT t.transaction_type
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            <include refid="TransactionFilters"/>
+            ORDER BY t.deal_date DESC, t.transaction_id DESC
+            LIMIT 1
+        ) AS latest_transaction_type,
+        (
+            SELECT COALESCE(t.deal_amount_krw, t.deposit_amount_krw)
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            <include refid="TransactionFilters"/>
+            ORDER BY t.deal_date DESC, t.transaction_id DESC
+            LIMIT 1
+        ) AS latest_deal_amount,
+        (
+            SELECT t.deal_date
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            <include refid="TransactionFilters"/>
+            ORDER BY t.deal_date DESC, t.transaction_id DESC
+            LIMIT 1
+        ) AS latest_deal_date,
+        (
+            SELECT COUNT(*)
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            <include refid="TransactionFilters"/>
+        ) AS deal_count
+    </sql>
+
+    <sql id="MapWhere">
+        WHERE p.latitude IS NOT NULL
+          AND p.longitude IS NOT NULL
+          AND p.latitude BETWEEN #{request.swLat} AND #{request.neLat}
+          AND p.longitude BETWEEN #{request.swLng} AND #{request.neLng}
+        <include refid="PropertyTypeFilter"/>
+        <include refid="FilteredTransactionExists"/>
+    </sql>
+
+    <sql id="SearchWhere">
+        WHERE 1 = 1
+        <include refid="PropertyTypeFilter"/>
+        <include refid="FilteredTransactionExists"/>
+        <if test="request.sido != null and request.sido != ''">
+            AND p.sido = #{request.sido}
+        </if>
+        <if test="request.sigungu != null and request.sigungu != ''">
+            AND p.sigungu = #{request.sigungu}
+        </if>
+        <if test="request.legalDong != null and request.legalDong != ''">
+            AND p.legal_dong = #{request.legalDong}
+        </if>
+        <if test="request.complexName != null and request.complexName != ''">
+            AND p.name LIKE CONCAT('%', #{request.complexName}, '%')
+        </if>
+        <if test="request.keyword != null and request.keyword != ''">
+            AND (
+                p.name LIKE CONCAT('%', #{request.keyword}, '%')
+                OR p.road_address LIKE CONCAT('%', #{request.keyword}, '%')
+                OR p.jibun_address LIKE CONCAT('%', #{request.keyword}, '%')
+                OR p.legal_dong LIKE CONCAT('%', #{request.keyword}, '%')
+            )
+        </if>
+        <if test="request.swLat != null and request.swLng != null and request.neLat != null and request.neLng != null">
+            AND p.latitude BETWEEN #{request.swLat} AND #{request.neLat}
+            AND p.longitude BETWEEN #{request.swLng} AND #{request.neLng}
+        </if>
+    </sql>
+
+    <select id="findMapProperties" resultType="com.jiber.backend.property.PropertyListRow">
+        SELECT
+            <include refid="ListColumns"/>,
+            NULL AS distance_m
+        FROM properties p
+        <include refid="MapWhere"/>
+        ORDER BY latest_deal_date DESC, p.property_id DESC
+    </select>
+
+    <select id="searchProperties" resultType="com.jiber.backend.property.PropertyListRow">
+        SELECT
+            <include refid="ListColumns"/>,
+            <choose>
+                <when test="request.centerLat != null and request.centerLng != null">
+                    CAST(ROUND(ST_Distance_Sphere(POINT(p.longitude, p.latitude), POINT(#{request.centerLng}, #{request.centerLat}))) AS SIGNED)
+                </when>
+                <otherwise>
+                    NULL
+                </otherwise>
+            </choose> AS distance_m
+        FROM properties p
+        <include refid="SearchWhere"/>
+        <choose>
+            <when test="request.sort == 'distance,asc' and request.centerLat != null and request.centerLng != null">
+                ORDER BY distance_m ASC, latest_deal_date DESC, p.property_id DESC
+            </when>
+            <when test="request.sort == 'latestDealAmount,desc'">
+                ORDER BY latest_deal_amount DESC, latest_deal_date DESC, p.property_id DESC
+            </when>
+            <when test="request.sort == 'dealCount,desc'">
+                ORDER BY deal_count DESC, latest_deal_date DESC, p.property_id DESC
+            </when>
+            <when test="request.sort == 'relevance,desc' or request.keyword != null or request.complexName != null">
+                ORDER BY
+                <choose>
+                    <when test="request.complexName != null and request.complexName != ''">
+                        CASE
+                            WHEN p.name = #{request.complexName} THEN 3
+                            WHEN p.name LIKE CONCAT(#{request.complexName}, '%') THEN 2
+                            ELSE 1
+                        END
+                    </when>
+                    <when test="request.keyword != null and request.keyword != ''">
+                        CASE
+                            WHEN p.name LIKE CONCAT(#{request.keyword}, '%') THEN 2
+                            WHEN p.name LIKE CONCAT('%', #{request.keyword}, '%')
+                                OR p.road_address LIKE CONCAT('%', #{request.keyword}, '%')
+                                OR p.jibun_address LIKE CONCAT('%', #{request.keyword}, '%')
+                                OR p.legal_dong LIKE CONCAT('%', #{request.keyword}, '%') THEN 1
+                            ELSE 0
+                        END
+                    </when>
+                    <otherwise>
+                        0
+                    </otherwise>
+                </choose> DESC,
+                latest_deal_date DESC,
+                p.property_id DESC
+            </when>
+            <otherwise>
+                ORDER BY latest_deal_date DESC, p.property_id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countSearchProperties" resultType="long">
+        SELECT COUNT(*)
+        FROM properties p
+        <include refid="SearchWhere"/>
+    </select>
+
+    <select id="findDetailById" resultType="com.jiber.backend.property.PropertyDetailRow">
+        SELECT
+            p.property_id,
+            p.property_type,
+            p.name,
+            p.sido,
+            p.sigungu,
+            p.legal_dong,
+            p.road_address,
+            p.jibun_address,
+            p.latitude,
+            p.longitude,
+            p.built_year,
+            p.household_count,
+            (
+                SELECT COALESCE(t.deal_amount_krw, t.deposit_amount_krw)
+                FROM property_transactions t
+                WHERE t.property_id = p.property_id
+                ORDER BY t.deal_date DESC, t.transaction_id DESC
+                LIMIT 1
+            ) AS latest_deal_amount,
+            (
+                SELECT t.deal_date
+                FROM property_transactions t
+                WHERE t.property_id = p.property_id
+                ORDER BY t.deal_date DESC, t.transaction_id DESC
+                LIMIT 1
+            ) AS latest_deal_date
+        FROM properties p
+        WHERE p.property_id = #{propertyId}
+    </select>
+
+    <select id="findRecentTransactions" resultType="com.jiber.backend.property.PropertyTransactionRow">
+        SELECT
+            transaction_id,
+            transaction_type,
+            exclusive_area_m2,
+            floor,
+            deal_amount_krw AS deal_amount,
+            deposit_amount_krw AS deposit_amount,
+            monthly_rent_krw AS monthly_rent,
+            deal_date
+        FROM property_transactions
+        WHERE property_id = #{propertyId}
+        ORDER BY deal_date DESC, transaction_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findPropertyTypeById" resultType="com.jiber.backend.property.PropertyType">
+        SELECT property_type
+        FROM properties
+        WHERE property_id = #{propertyId}
+    </select>
+</mapper>

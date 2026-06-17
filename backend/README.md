@@ -113,7 +113,8 @@ mvn test
 - refresh token reuse가 감지되면 재사용된 session과 그 descendant/current session family를 revoke하고 `AUTH_REQUIRED`를 반환합니다.
 - 현재 security skeleton은 `AUTH_REQUIRED`, `ACCESS_DENIED`를 공통 error shape로 반환합니다.
 - credentialed CORS에서는 wildcard origin을 허용하지 않으며, `BACKEND_CORS_ALLOWED_ORIGINS`에 `*`가 포함되면 fail-fast 처리합니다.
-- OAuth2 success handler는 local user 생성/조회 책임을 `LocalOAuth2UserProvisioningService`로 분리하고, 신규 사용자는 항상 `USER`로만 생성합니다.
+- 현재 OAuth2 success handler는 provider callback 후 local user를 자동 생성/로그인하는 구현입니다. 이 흐름은 `docs/contracts/auth-flow.md`의 새 목표 계약에 맞춰 이메일/비밀번호 계정 + 소셜 계정 연동 구조로 교체해야 합니다.
+- 목표 구조에서는 OAuth callback이 이미 연결된 social account만 바로 로그인합니다. 미연결 provider identity는 pending social session을 만들고 `/signup/social`에서 신규 가입 또는 기존 계정 연동을 완료하게 해야 합니다.
 - 최초 `ADMIN` 권한은 자동 부여하지 않습니다. 별도 seed, migration, 또는 운영 script에서 명시 user ID/email allowlist로 처리해야 합니다.
 
 ### Auth Environment Variables
@@ -153,17 +154,21 @@ Provider console에는 Spring Boot 기본 callback 경로를 등록합니다.
 - Kakao: `http://localhost:8080/login/oauth2/code/kakao`
 - Naver: `http://localhost:8080/login/oauth2/code/naver`
 
-OAuth 성공 후 backend는 refresh cookie를 설정하고 `FRONTEND_PUBLIC_BASE_URL/login/callback`으로 redirect합니다. access token, refresh token, provider token은 redirect URL에 넣지 않습니다.
+목표 계약에서는 이미 연결된 social account의 OAuth 성공만 refresh cookie를 설정하고 `FRONTEND_PUBLIC_BASE_URL/login/callback`으로 redirect합니다. 미연결 social account는 pending social cookie를 설정하고 `FRONTEND_PUBLIC_BASE_URL/signup/social`로 redirect합니다. access token, refresh token, pending social token, provider token은 redirect URL에 넣지 않습니다.
 
 ### Remaining Auth Handoff
 
+- Auth / Security Agent: 현재 provider-owned `users` 구조를 email/password `users`, `user_social_accounts`, `oauth_pending_social_sessions` 구조로 마이그레이션하세요.
+- Auth / Security Agent: `POST /api/v1/auth/signup`, `POST /api/v1/auth/login`, `GET /api/v1/auth/social/pending`, `POST /api/v1/auth/social/signup`, `POST /api/v1/auth/social/link`, `GET /api/v1/auth/social-accounts`를 구현하세요.
+- Auth / Security Agent: matching email만으로 social account를 기존 user에 자동 연결하지 마세요. 기존 계정 연동은 이메일/비밀번호 인증 후 진행해야 합니다.
 - Backend API Agent: `AuthUserPrincipal`을 favorite ownership, valuation, SHAP, notice mutation 작성자/수정자 기록에 연결하세요.
 - Backend API Agent: `refresh_sessions` mapper query와 recursive session family revocation SQL을 실제 MySQL에서 검증하세요.
-- Backend API Agent: OAuth2 provider 실제 앱 등록 후 Google/Kakao/Naver E2E 로그인과 DB-backed local user provisioning을 검증하세요.
-- Frontend / Map Agent: `/login/callback` 진입 후 `POST /api/v1/auth/refresh`를 credentials 포함으로 호출하고, access token은 메모리에만 보관하세요.
+- Frontend / Map Agent: `/login`, `/signup`, `/signup/social` route와 이메일/비밀번호 form, social signup/link UX를 구현하세요.
+- Frontend / Map Agent: 이미 연결된 social login의 `/login/callback` 진입 후 `POST /api/v1/auth/refresh`를 credentials 포함으로 호출하고, access token은 메모리에만 보관하세요.
+- Frontend / Map Agent: 미연결 social callback의 `/signup/social` 진입 후 `GET /api/v1/auth/social/pending`을 호출해 신규 가입 또는 기존 계정 연동을 안내하세요.
 - Frontend / Map Agent: logout 후 in-memory access token을 지우고 `/api/v1/auth/logout` 응답 body나 URL에서 token을 찾지 마세요.
 - QA / Review Agent: redirect URL, localStorage, sessionStorage, log, committed files에 token/secret이 남지 않는지 확인하세요.
-- QA / Review Agent: anonymous, `USER`, `ADMIN` 권한 matrix와 refresh cookie flags를 local/prod-like 설정에서 검증하세요.
+- QA / Review Agent: email signup/login, social signup, existing-account social link, already-linked social login, anonymous, `USER`, `ADMIN` 권한 matrix와 refresh/pending cookie flags를 local/prod-like 설정에서 검증하세요.
 
 ## AI / Model Server Handoff
 
@@ -195,6 +200,8 @@ schema 초안은 `../db/001_phase1_schema.sql`입니다.
 - `properties`
 - `property_transactions`
 - `users`
+- `user_social_accounts` (target auth redesign)
+- `oauth_pending_social_sessions` (target auth redesign)
 - `refresh_sessions`
 - `favorite_apartments`
 - `favorite_areas`

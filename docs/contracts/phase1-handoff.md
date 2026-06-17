@@ -6,6 +6,7 @@ These notes summarize how the current contract changes affect Phase 1 backend, f
 
 ## Backend API Agent Impact
 
+- Defer DB-backed favorites implementation until the Auth / Security Agent finishes the email/password plus social-account-linking redesign.
 - Implement property search DTOs using `swLat`, `swLng`, `neLat`, `neLng`, `propertyTypes`, `transactionTypes`, and `zoomLevel`.
 - Use comma-separated query parsing for list filters.
 - Support administrative filters: `sido`, `sigungu`, `legalDong`, `complexName`, and general `keyword`.
@@ -16,6 +17,9 @@ These notes summarize how the current contract changes affect Phase 1 backend, f
 
 ## Frontend / Map Agent Impact
 
+- Add `/login`, `/signup`, and `/signup/social` before building more auth-gated flows.
+- Treat social OAuth as signup/link assistance, not automatic account creation.
+- Keep `/login/callback` for already-linked social login completion.
 - Send map query parameters using `zoomLevel`, plural `propertyTypes`, and plural `transactionTypes`.
 - Use `/api/v1/properties/search` for list/sidebar search and include `centerLat`/`centerLng` when distance-prioritized ordering is needed.
 - Treat property detail, valuation, and SHAP as separate API calls.
@@ -24,6 +28,10 @@ These notes summarize how the current contract changes affect Phase 1 backend, f
 
 ## Auth / Security Agent Impact
 
+- Replace automatic OAuth user upsert with email/password users plus `user_social_accounts` and pending social sessions.
+- Implement email/password signup and login before continuing favorites ownership work.
+- OAuth callback should log in only when the provider identity is already linked. Otherwise it should create a pending social session and redirect to `/signup/social`.
+- Existing-account social linking must require the Jiber account owner to authenticate with email/password first. Matching email alone must never link accounts.
 - Follow the confirmed token policy in `docs/contracts/auth-flow.md`:
   - refresh token is an HttpOnly cookie with server-side revocation state
   - access token is short-lived, returned in JSON, and stored in frontend memory only
@@ -43,6 +51,7 @@ These notes summarize how the current contract changes affect Phase 1 backend, f
 
 ## QA / Review Agent Impact
 
+- Verify email signup, email login, social signup, existing-account social link, already-linked social login, refresh, logout, and protected route behavior.
 - Verify request parameter naming drift: `zoom` and `propertyType` should not be used in Phase 1 contracts.
 - Verify anonymous access for map search, filter search, property detail, and public notice reads.
 - Verify authenticated access for favorites.
@@ -55,6 +64,6 @@ These notes summarize how the current contract changes affect Phase 1 backend, f
 - Actual OAuth credentials and JWT secret values are unresolved.
 - Actual first `ADMIN` account identity is unresolved, though the provisioning method is decided.
 - Kakao Maps API key and allowed domains are unresolved.
-- Refresh session persistence schema is unresolved.
-- MySQL schema and indexes for bounds search, favorite uniqueness, and notices are unresolved.
+- Target auth migration from provider-owned `users` to email users plus social account links is unresolved.
+- MySQL schema and indexes for social account links, pending social sessions, favorite uniqueness, and notices are unresolved.
 - Model feature set and model artifact availability are unresolved.

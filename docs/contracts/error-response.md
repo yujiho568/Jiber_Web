@@ -33,6 +33,8 @@ All public Spring Boot API errors should use this shape:
 | --- | --- | --- |
 | 400 | `VALIDATION_FAILED` | Request parameter or body validation failed. |
 | 401 | `AUTH_REQUIRED` | Login is required. |
+| 401 | `INVALID_CREDENTIALS` | Email/password login failed. Do not reveal which field was wrong. |
+| 401 | `SOCIAL_PENDING_NOT_FOUND` | Pending social signup/link session is missing, expired, consumed, or invalid. |
 | 403 | `ACCESS_DENIED` | User lacks the required role or ownership. |
 | 404 | `PROPERTY_NOT_FOUND` | Property does not exist. |
 | 404 | `NOTICE_NOT_FOUND` | Notice does not exist. |
@@ -40,6 +42,8 @@ All public Spring Boot API errors should use this shape:
 | 404 | `FAVORITE_AREA_NOT_FOUND` | Favorite area does not exist for the current user. |
 | 409 | `FAVORITE_ALREADY_EXISTS` | Favorite already exists for the user. |
 | 409 | `FAVORITE_AREA_ALREADY_EXISTS` | Favorite area already exists for the user. |
+| 409 | `EMAIL_ALREADY_EXISTS` | Signup email already belongs to a Jiber account. |
+| 409 | `SOCIAL_ACCOUNT_ALREADY_LINKED` | OAuth provider identity is already linked to a Jiber account. |
 | 422 | `VALUATION_UNSUPPORTED_PROPERTY_TYPE` | AI valuation is not available for non-apartment property types. |
 | 422 | `VALUATION_INSUFFICIENT_DATA` | Required model features are missing. |
 | 502 | `MODEL_SERVER_UNAVAILABLE` | Backend could not reach the model server. |

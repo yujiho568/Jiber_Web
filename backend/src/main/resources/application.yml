@@ -42,6 +42,19 @@ jiber:
         path: ${AUTH_REFRESH_TOKEN_COOKIE_PATH:/api/v1/auth}
         same-site: ${AUTH_REFRESH_TOKEN_COOKIE_SAME_SITE:Lax}
         secure: ${AUTH_REFRESH_TOKEN_COOKIE_SECURE:false}
+    oauth2:
+      google:
+        client-id: ${OAUTH_GOOGLE_CLIENT_ID:}
+        client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:}
+        redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
+      kakao:
+        client-id: ${OAUTH_KAKAO_CLIENT_ID:}
+        client-secret: ${OAUTH_KAKAO_CLIENT_SECRET:}
+        redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI:http://localhost:8080/login/oauth2/code/kakao}
+      naver:
+        client-id: ${OAUTH_NAVER_CLIENT_ID:}
+        client-secret: ${OAUTH_NAVER_CLIENT_SECRET:}
+        redirect-uri: ${OAUTH_NAVER_REDIRECT_URI:http://localhost:8080/login/oauth2/code/naver}
   model-server:
     base-url: ${MODEL_SERVER_BASE_URL:http://localhost:8000}
     internal-token: ${MODEL_SERVER_INTERNAL_TOKEN:}

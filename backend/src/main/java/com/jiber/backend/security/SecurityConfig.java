@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -58,6 +59,13 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(securityErrorResponseWriter::writeUnauthorized)
                         .accessDeniedHandler(securityErrorResponseWriter::writeAccessDenied))
+                .addFilterBefore(
+                        new OAuth2AuthorizationEndpointGuardFilter(
+                                securityErrorResponseWriter,
+                                clientRegistrationRepository
+                        ),
+                        OAuth2AuthorizationRequestRedirectFilter.class
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         var successHandler = oauth2LoginSuccessHandler.getIfAvailable();

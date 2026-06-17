@@ -57,10 +57,13 @@ mvn test
 - `AUTH_REFRESH_TOKEN_COOKIE_SECURE`
 - `OAUTH_GOOGLE_CLIENT_ID`
 - `OAUTH_GOOGLE_CLIENT_SECRET`
+- `OAUTH_GOOGLE_REDIRECT_URI`
 - `OAUTH_KAKAO_CLIENT_ID`
 - `OAUTH_KAKAO_CLIENT_SECRET`
+- `OAUTH_KAKAO_REDIRECT_URI`
 - `OAUTH_NAVER_CLIENT_ID`
 - `OAUTH_NAVER_CLIENT_SECRET`
+- `OAUTH_NAVER_REDIRECT_URI`
 - `MODEL_SERVER_BASE_URL`
 - `MODEL_SERVER_INTERNAL_TOKEN`
 - `MODEL_SERVER_CONNECT_TIMEOUT_MS`
@@ -81,6 +84,7 @@ mvn test
 - refresh token rotation 후 재사용 감지 시 해당 session family revocation skeleton
 - `GET /api/v1/auth/me`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout` skeleton
 - OAuth2 login success handler skeleton
+- Google/Kakao/Naver OAuth2 client registration 환경 변수 연결
 - property, favorite, notice controller/DTO/service skeleton
 - property map/search/detail API의 canonical table 기반 MyBatis 조회 skeleton
 - Springdoc OpenAPI 설정
@@ -91,7 +95,7 @@ mvn test
 아직 mock/skeleton인 부분:
 
 - Property map/search/detail MyBatis mapper query의 실제 MySQL 통합 검증
-- OAuth2 client registration과 provider secret 주입
+- 실제 Google/Kakao/Naver OAuth app 등록 후 provider별 E2E 로그인 검증
 - refresh token reuse 감지 시 session family revocation SQL의 실제 MySQL 통합 검증
 - 현재 로그인 사용자 주입과 favorite ownership 검증
 - model-server feature mapping의 실제 DB/거래 데이터 기반 보강
@@ -127,6 +131,19 @@ mvn test
 - `BACKEND_CORS_ALLOWED_ORIGINS`: credentialed API 요청을 위해 명시 origin만 허용합니다. `*`는 허용하지 않습니다.
 - `FRONTEND_PUBLIC_BASE_URL`: OAuth 성공 후 redirect base URL. 기본값 `http://localhost:5173`.
 - `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET`, `OAUTH_KAKAO_CLIENT_ID`, `OAUTH_KAKAO_CLIENT_SECRET`, `OAUTH_NAVER_CLIENT_ID`, `OAUTH_NAVER_CLIENT_SECRET`: 실제 OAuth app 등록 후 환경으로만 주입합니다.
+- `OAUTH_GOOGLE_REDIRECT_URI`, `OAUTH_KAKAO_REDIRECT_URI`, `OAUTH_NAVER_REDIRECT_URI`: provider console에 등록한 backend callback URL과 일치해야 합니다. 비워 두면 로컬 callback 기본값을 사용합니다.
+
+### Local OAuth Setup
+
+OAuth client id/secret이 모두 비어 있으면 local/dev/test app context는 정상 기동하지만 OAuth 시작 endpoint는 등록되지 않습니다. provider 일부만 설정하면 설정된 provider만 `/oauth2/authorization/{provider}`로 시작할 수 있습니다.
+
+```bash
+OAUTH_KAKAO_CLIENT_ID=<kakao-client-id>
+OAUTH_KAKAO_CLIENT_SECRET=<kakao-client-secret>
+OAUTH_KAKAO_REDIRECT_URI=http://localhost:8080/login/oauth2/code/kakao
+```
+
+Google은 Spring Security 기본 provider metadata를 사용합니다. Kakao/Naver는 backend 설정에서 authorization, token, user-info endpoint와 user-name-attribute를 명시합니다.
 
 ### OAuth Callback URLs
 
@@ -142,7 +159,7 @@ OAuth 성공 후 backend는 refresh cookie를 설정하고 `FRONTEND_PUBLIC_BASE
 
 - Backend API Agent: `AuthUserPrincipal`을 favorite ownership, valuation, SHAP, notice mutation 작성자/수정자 기록에 연결하세요.
 - Backend API Agent: `refresh_sessions` mapper query와 recursive session family revocation SQL을 실제 MySQL에서 검증하세요.
-- Backend API Agent: OAuth2 client registration은 실제 secret 없이 환경 설정 문서 또는 profile 설정으로 연결하세요.
+- Backend API Agent: OAuth2 provider 실제 앱 등록 후 Google/Kakao/Naver E2E 로그인과 DB-backed local user provisioning을 검증하세요.
 - Frontend / Map Agent: `/login/callback` 진입 후 `POST /api/v1/auth/refresh`를 credentials 포함으로 호출하고, access token은 메모리에만 보관하세요.
 - Frontend / Map Agent: logout 후 in-memory access token을 지우고 `/api/v1/auth/logout` 응답 body나 URL에서 token을 찾지 마세요.
 - QA / Review Agent: redirect URL, localStorage, sessionStorage, log, committed files에 token/secret이 남지 않는지 확인하세요.

@@ -5,9 +5,8 @@ import java.util.Set;
 
 public record AuthUserRecord(
         Long userId,
-        String oauthProvider,
-        String providerUserId,
         String email,
+        String passwordHash,
         String displayName,
         String role,
         Boolean enabled,

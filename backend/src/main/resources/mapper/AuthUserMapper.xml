@@ -6,9 +6,8 @@
     <resultMap id="AuthUserRecordMap" type="com.jiber.backend.auth.AuthUserRecord">
         <constructor>
             <idArg column="user_id" javaType="java.lang.Long"/>
-            <arg column="oauth_provider" javaType="java.lang.String"/>
-            <arg column="provider_user_id" javaType="java.lang.String"/>
             <arg column="email" javaType="java.lang.String"/>
+            <arg column="password_hash" javaType="java.lang.String"/>
             <arg column="display_name" javaType="java.lang.String"/>
             <arg column="role" javaType="java.lang.String"/>
             <arg column="enabled" javaType="java.lang.Boolean"/>
@@ -21,9 +20,8 @@
     <select id="findById" resultMap="AuthUserRecordMap">
         SELECT
             user_id,
-            oauth_provider,
-            provider_user_id,
             email,
+            password_hash,
             display_name,
             role,
             enabled,
@@ -34,12 +32,11 @@
         WHERE user_id = #{userId}
     </select>
 
-    <select id="findByProvider" resultMap="AuthUserRecordMap">
+    <select id="findByEmail" resultMap="AuthUserRecordMap">
         SELECT
             user_id,
-            oauth_provider,
-            provider_user_id,
             email,
+            password_hash,
             display_name,
             role,
             enabled,
@@ -47,32 +44,31 @@
             created_at,
             updated_at
         FROM users
-        WHERE oauth_provider = #{oauthProvider}
-          AND provider_user_id = #{providerUserId}
+        WHERE email = #{email}
     </select>
 
-    <insert id="upsertOAuthUser">
+    <insert id="insertEmailUser">
         INSERT INTO users (
-            oauth_provider,
-            provider_user_id,
             email,
+            password_hash,
             display_name,
             role,
             enabled,
             last_login_at
         ) VALUES (
-            #{oauthProvider},
-            #{providerUserId},
             #{email},
+            #{passwordHash},
             #{displayName},
-            'USER',
-            TRUE,
+            #{role},
+            #{enabled},
             #{lastLoginAt}
         )
-        ON DUPLICATE KEY UPDATE
-            email = VALUES(email),
-            display_name = VALUES(display_name),
-            last_login_at = VALUES(last_login_at),
-            updated_at = CURRENT_TIMESTAMP(6)
     </insert>
+
+    <update id="updateLastLoginAt">
+        UPDATE users
+        SET last_login_at = #{lastLoginAt},
+            updated_at = CURRENT_TIMESTAMP(6)
+        WHERE user_id = #{userId}
+    </update>
 </mapper>

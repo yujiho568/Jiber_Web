@@ -220,6 +220,41 @@ schema 초안은 `../db/001_phase1_schema.sql`입니다.
 
 로컬 개발에서는 Docker MySQL 또는 로컬 MySQL 중 편한 방식을 사용할 수 있습니다. 운영에서는 Docker MySQL 고정이 아니라 managed DB 또는 운영 표준 MySQL 중 선택해야 합니다.
 
+### 004 Auth Account Migration Runbook
+
+`../db/004_auth_account_social_link.sql`은 provider-owned legacy `users`를 email/password account와 `user_social_accounts`로 분리하는 versioned one-shot migration입니다. 성공한 파일은 재실행하지 않습니다. 성공 후 재실행하면 `password_hash` column 또는 `uk_users_email` key가 이미 존재해 실패할 수 있습니다.
+
+004는 DDL 전에 duplicate legacy email preflight를 수행합니다. 같은 normalized email이 여러 legacy OAuth user에 있으면 자동 merge하지 않고 `JIBER_AUTH_MIGRATION_DUPLICATE_EMAIL`로 중단합니다. 이 실패는 DDL 전에 발생하므로 cleanup 후 004를 다시 실행할 수 있습니다.
+
+실행 전 duplicate legacy email 진단:
+
+```sql
+SELECT
+    SHA2(LOWER(TRIM(email)), 256) AS email_sha256,
+    COUNT(*) AS legacy_user_count,
+    GROUP_CONCAT(user_id ORDER BY user_id) AS user_ids,
+    GROUP_CONCAT(DISTINCT oauth_provider ORDER BY oauth_provider SEPARATOR ',') AS providers
+FROM users
+WHERE email IS NOT NULL
+  AND TRIM(email) <> ''
+GROUP BY LOWER(TRIM(email))
+HAVING COUNT(*) > 1;
+```
+
+이 진단은 email 원문과 provider subject 전체값을 출력하지 않습니다. `email_sha256`, user id, provider 종류만 보고 중복 그룹을 식별한 뒤 운영자가 canonical user를 결정해야 합니다.
+
+Cleanup policy:
+
+1. 각 duplicate legacy email 그룹에서 유지할 canonical user를 명시적으로 고릅니다. 최근 로그인, 실제 계정 소유 확인, 보존해야 할 favorites/notice 기록 등을 기준으로 결정합니다.
+2. canonical user가 아닌 legacy user의 provider identity는 canonical user의 `user_social_accounts`로 옮깁니다. 004가 아직 실행되지 않은 DB라면 004의 `user_social_accounts` DDL과 같은 구조를 먼저 만들고, non-canonical user의 `oauth_provider`, `provider_user_id`, `email`, `display_name`을 canonical `user_id`로 insert한 뒤 검증합니다.
+3. `refresh_sessions`는 보안상 non-canonical user의 세션을 revoke 또는 삭제하고 재로그인을 요구하는 쪽을 기본으로 합니다.
+4. `favorite_apartments`, `favorite_areas`는 canonical user로 옮기되 unique 충돌이 있으면 하나만 보존합니다.
+5. `notices.created_by_user_id`, `notices.updated_by_user_id`, `apartment_price_predictions.user_id`는 canonical user로 옮기거나 운영 판단에 따라 `NULL` 처리합니다.
+6. FK 소유 데이터와 social account 이동을 검증한 뒤 non-canonical legacy user row를 삭제하거나 email을 제거하고 disabled 상태로 둡니다. 삭제 전에는 반드시 백업 또는 volume snapshot을 남깁니다.
+7. duplicate 진단 쿼리가 0건을 반환하면 004를 다시 실행합니다.
+
+004가 DDL 시작 이후 실패했다면 무작정 재실행하지 않습니다. DB snapshot/volume을 복원하거나, 어떤 DDL이 적용됐는지 확인한 뒤 수동 복구 SQL을 작성해야 합니다.
+
 ### Local Docker MySQL
 
 루트 `compose.yaml`은 MySQL 8 로컬 개발용입니다. 실제 DB 비밀번호는 `.env`에만 둡니다.

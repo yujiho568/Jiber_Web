@@ -13,35 +13,41 @@ import org.springframework.util.StringUtils;
 public class LocalOAuth2UserProvisioningService {
 
     private final AuthUserMapper authUserMapper;
+    private final SocialAccountMapper socialAccountMapper;
     private final Clock clock;
 
     @Autowired
-    public LocalOAuth2UserProvisioningService(AuthUserMapper authUserMapper) {
-        this(authUserMapper, Clock.systemUTC());
+    public LocalOAuth2UserProvisioningService(AuthUserMapper authUserMapper, SocialAccountMapper socialAccountMapper) {
+        this(authUserMapper, socialAccountMapper, Clock.systemUTC());
     }
 
-    static LocalOAuth2UserProvisioningService forTesting(AuthUserMapper authUserMapper, Clock clock) {
-        return new LocalOAuth2UserProvisioningService(authUserMapper, clock);
+    static LocalOAuth2UserProvisioningService forTesting(
+            AuthUserMapper authUserMapper,
+            SocialAccountMapper socialAccountMapper,
+            Clock clock
+    ) {
+        return new LocalOAuth2UserProvisioningService(authUserMapper, socialAccountMapper, clock);
     }
 
-    private LocalOAuth2UserProvisioningService(AuthUserMapper authUserMapper, Clock clock) {
+    private LocalOAuth2UserProvisioningService(
+            AuthUserMapper authUserMapper,
+            SocialAccountMapper socialAccountMapper,
+            Clock clock
+    ) {
         this.authUserMapper = authUserMapper;
+        this.socialAccountMapper = socialAccountMapper;
         this.clock = clock;
     }
 
     public AuthUserPrincipal provision(OAuth2ProviderUser providerUser) {
         validate(providerUser);
-        authUserMapper.upsertOAuthUser(
-                providerUser.provider().name(),
-                providerUser.providerUserId(),
-                providerUser.email(),
-                providerUser.displayName(),
-                OffsetDateTime.now(clock)
-        );
-        var user = authUserMapper.findByProvider(providerUser.provider().name(), providerUser.providerUserId());
+        var user = socialAccountMapper.findLinkedUserByProvider(providerUser.provider().name(), providerUser.providerUserId());
         if (user == null || Boolean.FALSE.equals(user.enabled())) {
             throw new ApiException(ErrorCode.AUTH_REQUIRED, ErrorCode.AUTH_REQUIRED.defaultMessage(), List.of());
         }
+        var now = OffsetDateTime.now(clock);
+        socialAccountMapper.updateLastLoginAt(providerUser.provider().name(), providerUser.providerUserId(), now);
+        authUserMapper.updateLastLoginAt(user.userId(), now);
         return user.toPrincipal();
     }
 

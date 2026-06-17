@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiber.backend.auth.PendingSocialSessionMapper">
+    <resultMap id="PendingSocialSessionRecordMap" type="com.jiber.backend.auth.PendingSocialSessionRecord">
+        <constructor>
+            <idArg column="pending_social_session_id" javaType="java.lang.Long"/>
+            <arg column="pending_token_hash" javaType="java.lang.String"/>
+            <arg column="oauth_provider" javaType="java.lang.String"/>
+            <arg column="provider_user_id" javaType="java.lang.String"/>
+            <arg column="provider_email" javaType="java.lang.String"/>
+            <arg column="provider_display_name" javaType="java.lang.String"/>
+            <arg column="suggested_email" javaType="java.lang.String"/>
+            <arg column="expires_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="consumed_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="created_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="updated_at" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.jiber.backend.auth.PendingSocialSessionInsertCommand">
+        INSERT INTO oauth_pending_social_sessions (
+            pending_token_hash,
+            oauth_provider,
+            provider_user_id,
+            provider_email,
+            provider_display_name,
+            suggested_email,
+            expires_at
+        ) VALUES (
+            #{pendingTokenHash},
+            #{oauthProvider},
+            #{providerUserId},
+            #{providerEmail},
+            #{providerDisplayName},
+            #{suggestedEmail},
+            #{expiresAt}
+        )
+    </insert>
+
+    <select id="findByTokenHash" resultMap="PendingSocialSessionRecordMap">
+        SELECT
+            pending_social_session_id,
+            pending_token_hash,
+            oauth_provider,
+            provider_user_id,
+            provider_email,
+            provider_display_name,
+            suggested_email,
+            expires_at,
+            consumed_at,
+            created_at,
+            updated_at
+        FROM oauth_pending_social_sessions
+        WHERE pending_token_hash = #{pendingTokenHash}
+    </select>
+
+    <select id="findActiveByTokenHash" resultMap="PendingSocialSessionRecordMap">
+        SELECT
+            pending_social_session_id,
+            pending_token_hash,
+            oauth_provider,
+            provider_user_id,
+            provider_email,
+            provider_display_name,
+            suggested_email,
+            expires_at,
+            consumed_at,
+            created_at,
+            updated_at
+        FROM oauth_pending_social_sessions
+        WHERE pending_token_hash = #{pendingTokenHash}
+          AND consumed_at IS NULL
+          AND expires_at &gt; #{now}
+    </select>
+
+    <update id="consume">
+        UPDATE oauth_pending_social_sessions
+        SET consumed_at = COALESCE(consumed_at, #{consumedAt}),
+            updated_at = CURRENT_TIMESTAMP(6)
+        WHERE pending_token_hash = #{pendingTokenHash}
+          AND consumed_at IS NULL
+    </update>
+</mapper>

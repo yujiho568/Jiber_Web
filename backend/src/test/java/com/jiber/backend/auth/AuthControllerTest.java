@@ -102,16 +102,21 @@ class AuthControllerTest {
 
         @Override
         public AuthUserRecord findById(Long userId) {
-            return new AuthUserRecord(userId, "GOOGLE", "google-1", "user@example.com", "사용자", "USER", true, null, null, null);
+            return new AuthUserRecord(userId, "user@example.com", "$2a$10$testhashvaluefor mapper storage only", "사용자", "USER", true, null, null, null);
         }
 
         @Override
-        public AuthUserRecord findByProvider(String oauthProvider, String providerUserId) {
+        public AuthUserRecord findByEmail(String email) {
             return null;
         }
 
         @Override
-        public int upsertOAuthUser(String oauthProvider, String providerUserId, String email, String displayName, OffsetDateTime lastLoginAt) {
+        public int insertEmailUser(String email, String passwordHash, String displayName, String role, Boolean enabled, OffsetDateTime lastLoginAt) {
+            return 0;
+        }
+
+        @Override
+        public int updateLastLoginAt(Long userId, OffsetDateTime lastLoginAt) {
             return 0;
         }
     }

@@ -29,7 +29,7 @@ class OAuth2LoginSuccessHandlerTest {
         );
         var handler = new OAuth2LoginSuccessHandler(
                 new OAuth2ProviderUserResolver(),
-                LocalOAuth2UserProvisioningService.forTesting(new RecordingAuthUserMapper(), FIXED_CLOCK),
+                LocalOAuth2UserProvisioningService.forTesting(new RecordingAuthUserMapper(), new RecordingSocialAccountMapper(), FIXED_CLOCK),
                 RefreshTokenService.forTesting(refreshProperties, new RecordingRefreshSessionMapper(), new SecureRandom(new byte[]{9, 10, 11, 12}), FIXED_CLOCK),
                 new RefreshTokenCookieService(refreshProperties),
                 new FrontendProperties("http://localhost:5173")
@@ -62,12 +62,45 @@ class OAuth2LoginSuccessHandlerTest {
         }
 
         @Override
-        public AuthUserRecord findByProvider(String oauthProvider, String providerUserId) {
-            return new AuthUserRecord(1L, oauthProvider, providerUserId, "user@example.com", "사용자", "USER", true, null, null, null);
+        public AuthUserRecord findByEmail(String email) {
+            return null;
         }
 
         @Override
-        public int upsertOAuthUser(String oauthProvider, String providerUserId, String email, String displayName, OffsetDateTime lastLoginAt) {
+        public int insertEmailUser(String email, String passwordHash, String displayName, String role, Boolean enabled, OffsetDateTime lastLoginAt) {
+            return 0;
+        }
+
+        @Override
+        public int updateLastLoginAt(Long userId, OffsetDateTime lastLoginAt) {
+            return 1;
+        }
+    }
+
+    private static class RecordingSocialAccountMapper implements SocialAccountMapper {
+
+        @Override
+        public int insert(SocialAccountInsertCommand command) {
+            return 0;
+        }
+
+        @Override
+        public SocialAccountRecord findByProvider(String oauthProvider, String providerUserId) {
+            return null;
+        }
+
+        @Override
+        public AuthUserRecord findLinkedUserByProvider(String oauthProvider, String providerUserId) {
+            return new AuthUserRecord(1L, "user@example.com", "$2a$10$testhashvaluefor mapper storage only", "사용자", "USER", true, null, null, null);
+        }
+
+        @Override
+        public java.util.List<SocialAccountRecord> findByUserId(Long userId) {
+            return java.util.List.of();
+        }
+
+        @Override
+        public int updateLastLoginAt(String oauthProvider, String providerUserId, OffsetDateTime lastLoginAt) {
             return 1;
         }
     }

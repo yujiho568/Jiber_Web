@@ -25,7 +25,11 @@ import com.jiber.backend.auth.OAuth2ProviderUserResolver;
 import com.jiber.backend.auth.RefreshTokenCookieService;
 import com.jiber.backend.auth.RefreshTokenProperties;
 import com.jiber.backend.auth.RefreshTokenService;
+import com.jiber.backend.auth.SocialAccountInsertCommand;
+import com.jiber.backend.auth.SocialAccountMapper;
+import com.jiber.backend.auth.SocialAccountRecord;
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -121,7 +125,7 @@ class OAuth2AuthorizationEndpointTest {
         OAuth2LoginSuccessHandler oauth2LoginSuccessHandler(RefreshTokenCookieService refreshTokenCookieService) {
             return new OAuth2LoginSuccessHandler(
                     new OAuth2ProviderUserResolver(),
-                    new LocalOAuth2UserProvisioningService(new FakeAuthUserMapper()),
+                    new LocalOAuth2UserProvisioningService(new FakeAuthUserMapper(), new FakeSocialAccountMapper()),
                     null,
                     refreshTokenCookieService,
                     new FrontendProperties("http://localhost:5173")
@@ -136,12 +140,46 @@ class OAuth2AuthorizationEndpointTest {
             }
 
             @Override
-            public AuthUserRecord findByProvider(String oauthProvider, String providerUserId) {
+            public AuthUserRecord findByEmail(String email) {
+                return null;
+            }
+
+            @Override
+            public int insertEmailUser(
+                    String email,
+                    String passwordHash,
+                    String displayName,
+                    String role,
+                    Boolean enabled,
+                    OffsetDateTime lastLoginAt
+            ) {
+                return 0;
+            }
+
+            @Override
+            public int updateLastLoginAt(Long userId, OffsetDateTime lastLoginAt) {
+                return 1;
+            }
+        }
+
+        private static class FakeSocialAccountMapper implements SocialAccountMapper {
+
+            @Override
+            public int insert(SocialAccountInsertCommand command) {
+                return 0;
+            }
+
+            @Override
+            public SocialAccountRecord findByProvider(String oauthProvider, String providerUserId) {
+                return null;
+            }
+
+            @Override
+            public AuthUserRecord findLinkedUserByProvider(String oauthProvider, String providerUserId) {
                 return new AuthUserRecord(
                         1L,
-                        oauthProvider,
-                        providerUserId,
                         "oauth-user@example.test",
+                        "$2a$10$testhashvaluefor mapper storage only",
                         "OAuth User",
                         "USER",
                         true,
@@ -152,13 +190,12 @@ class OAuth2AuthorizationEndpointTest {
             }
 
             @Override
-            public int upsertOAuthUser(
-                    String oauthProvider,
-                    String providerUserId,
-                    String email,
-                    String displayName,
-                    OffsetDateTime lastLoginAt
-            ) {
+            public List<SocialAccountRecord> findByUserId(Long userId) {
+                return List.of();
+            }
+
+            @Override
+            public int updateLastLoginAt(String oauthProvider, String providerUserId, OffsetDateTime lastLoginAt) {
                 return 1;
             }
         }

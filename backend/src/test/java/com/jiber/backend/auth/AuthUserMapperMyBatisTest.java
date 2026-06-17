@@ -1,15 +1,15 @@
 package com.jiber.backend.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
@@ -25,7 +25,7 @@ import org.springframework.test.context.TestPropertySource;
 })
 class AuthUserMapperMyBatisTest {
 
-    private static final Clock FIXED_CLOCK = Clock.fixed(Instant.parse("2026-06-15T07:00:00Z"), ZoneOffset.UTC);
+    private static final String PASSWORD_HASH = "$2a$10$testhashvaluefor mapper storage only";
 
     @Autowired
     private AuthUserMapper authUserMapper;
@@ -39,9 +39,8 @@ class AuthUserMapperMyBatisTest {
         jdbcTemplate.execute("""
                 CREATE TABLE users (
                     user_id BIGINT NOT NULL AUTO_INCREMENT,
-                    oauth_provider VARCHAR(20) NOT NULL,
-                    provider_user_id VARCHAR(255) NOT NULL,
-                    email VARCHAR(320),
+                    email VARCHAR(320) NOT NULL,
+                    password_hash VARCHAR(255),
                     display_name VARCHAR(100),
                     role VARCHAR(20) NOT NULL DEFAULT 'USER',
                     enabled BOOLEAN NOT NULL DEFAULT TRUE,
@@ -49,40 +48,50 @@ class AuthUserMapperMyBatisTest {
                     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (user_id),
-                    UNIQUE (oauth_provider, provider_user_id)
+                    UNIQUE (email)
                 )
                 """);
     }
 
     @Test
-    void oauthProvisioningUsesDbBackedMapperAndMapsAuthUserRecord() {
-        var service = LocalOAuth2UserProvisioningService.forTesting(authUserMapper, FIXED_CLOCK);
+    void emailUserInsertAndFindByIdAndEmailUsesRecordConstructorMapping() {
+        var lastLoginAt = OffsetDateTime.parse("2026-06-15T07:00:00Z");
 
-        var principal = service.provision(new OAuth2ProviderUser(
-                OAuth2Provider.NAVER,
-                "naver-user-1",
-                "naver-user@example.com",
-                "네이버 사용자"
-        ));
+        authUserMapper.insertEmailUser(
+                "user@example.com",
+                PASSWORD_HASH,
+                "사용자",
+                "USER",
+                true,
+                lastLoginAt
+        );
 
-        var byProvider = authUserMapper.findByProvider("NAVER", "naver-user-1");
-        var byId = authUserMapper.findById(principal.userId());
+        var byEmail = authUserMapper.findByEmail("user@example.com");
+        var byId = authUserMapper.findById(byEmail.userId());
 
-        assertThat(byProvider).isNotNull();
-        assertThat(byId).isNotNull();
-        assertThat(byProvider).isEqualTo(byId);
-        assertThat(byProvider.userId()).isNotNull();
-        assertThat(byProvider.oauthProvider()).isEqualTo("NAVER");
-        assertThat(byProvider.providerUserId()).isEqualTo("naver-user-1");
-        assertThat(byProvider.email()).isEqualTo("naver-user@example.com");
-        assertThat(byProvider.displayName()).isEqualTo("네이버 사용자");
-        assertThat(byProvider.role()).isEqualTo("USER");
-        assertThat(byProvider.enabled()).isTrue();
-        assertThat(byProvider.lastLoginAt()).isNotNull();
-        assertThat(byProvider.createdAt()).isNotNull();
-        assertThat(byProvider.updatedAt()).isNotNull();
+        assertThat(byEmail).isNotNull();
+        assertThat(byId).isEqualTo(byEmail);
+        assertThat(byEmail.userId()).isNotNull();
+        assertThat(byEmail.email()).isEqualTo("user@example.com");
+        assertThat(byEmail.passwordHash()).isEqualTo(PASSWORD_HASH);
+        assertThat(byEmail.passwordHash()).startsWith("$2a$");
+        assertThat(byEmail.displayName()).isEqualTo("사용자");
+        assertThat(byEmail.role()).isEqualTo("USER");
+        assertThat(byEmail.enabled()).isTrue();
+        assertThat(byEmail.lastLoginAt()).isNotNull();
+        assertThat(byEmail.createdAt()).isNotNull();
+        assertThat(byEmail.updatedAt()).isNotNull();
+        assertThat(byEmail.toPrincipal().roles()).containsExactly("USER");
+        assertThat(byEmail.toPrincipal().roles()).doesNotContain("ADMIN");
+    }
 
-        assertThat(principal.roles()).containsExactly("USER");
-        assertThat(principal.roles()).doesNotContain("ADMIN");
+    @Test
+    void duplicateEmailIsRejectedByUniqueConstraint() {
+        var lastLoginAt = OffsetDateTime.parse("2026-06-15T07:00:00Z");
+        authUserMapper.insertEmailUser("user@example.com", PASSWORD_HASH, "사용자", "USER", true, lastLoginAt);
+
+        assertThatThrownBy(() ->
+                authUserMapper.insertEmailUser("user@example.com", PASSWORD_HASH, "다른 사용자", "USER", true, lastLoginAt)
+        ).isInstanceOf(DuplicateKeyException.class);
     }
 }

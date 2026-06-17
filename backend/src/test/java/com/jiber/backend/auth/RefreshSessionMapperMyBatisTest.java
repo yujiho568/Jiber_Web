@@ -51,9 +51,8 @@ class RefreshSessionMapperMyBatisTest {
         jdbcTemplate.execute("""
                 CREATE TABLE users (
                     user_id BIGINT NOT NULL AUTO_INCREMENT,
-                    oauth_provider VARCHAR(20) NOT NULL,
-                    provider_user_id VARCHAR(255) NOT NULL,
-                    email VARCHAR(320),
+                    email VARCHAR(320) NOT NULL,
+                    password_hash VARCHAR(255),
                     display_name VARCHAR(100),
                     role VARCHAR(20) NOT NULL DEFAULT 'USER',
                     enabled BOOLEAN NOT NULL DEFAULT TRUE,
@@ -61,7 +60,7 @@ class RefreshSessionMapperMyBatisTest {
                     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (user_id),
-                    UNIQUE (oauth_provider, provider_user_id)
+                    UNIQUE (email)
                 )
                 """);
         jdbcTemplate.execute("""
@@ -145,17 +144,15 @@ class RefreshSessionMapperMyBatisTest {
     void authServiceRefreshWorksWithDbBackedUserAndRefreshSessionMappers() {
         jdbcTemplate.update("""
                 INSERT INTO users (
-                    oauth_provider,
-                    provider_user_id,
                     email,
+                    password_hash,
                     display_name,
                     role,
                     enabled,
                     last_login_at
                 ) VALUES (
-                    'NAVER',
-                    'naver-user-1',
                     'naver-user@example.com',
+                    '$2a$10$testhashvaluefor mapper storage only',
                     '네이버 사용자',
                     'USER',
                     TRUE,

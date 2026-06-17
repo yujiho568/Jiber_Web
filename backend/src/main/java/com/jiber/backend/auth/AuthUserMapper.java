@@ -9,16 +9,19 @@ public interface AuthUserMapper {
 
     AuthUserRecord findById(@Param("userId") Long userId);
 
-    AuthUserRecord findByProvider(
-            @Param("oauthProvider") String oauthProvider,
-            @Param("providerUserId") String providerUserId
+    AuthUserRecord findByEmail(@Param("email") String email);
+
+    int insertEmailUser(
+            @Param("email") String email,
+            @Param("passwordHash") String passwordHash,
+            @Param("displayName") String displayName,
+            @Param("role") String role,
+            @Param("enabled") Boolean enabled,
+            @Param("lastLoginAt") OffsetDateTime lastLoginAt
     );
 
-    int upsertOAuthUser(
-            @Param("oauthProvider") String oauthProvider,
-            @Param("providerUserId") String providerUserId,
-            @Param("email") String email,
-            @Param("displayName") String displayName,
+    int updateLastLoginAt(
+            @Param("userId") Long userId,
             @Param("lastLoginAt") OffsetDateTime lastLoginAt
     );
 }

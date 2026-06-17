@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiber.backend.auth.SocialAccountMapper">
+    <resultMap id="SocialAccountRecordMap" type="com.jiber.backend.auth.SocialAccountRecord">
+        <constructor>
+            <idArg column="social_account_id" javaType="java.lang.Long"/>
+            <arg column="user_id" javaType="java.lang.Long"/>
+            <arg column="oauth_provider" javaType="java.lang.String"/>
+            <arg column="provider_user_id" javaType="java.lang.String"/>
+            <arg column="provider_email" javaType="java.lang.String"/>
+            <arg column="provider_display_name" javaType="java.lang.String"/>
+            <arg column="linked_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="last_login_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="created_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="updated_at" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="AuthUserRecordMap" type="com.jiber.backend.auth.AuthUserRecord">
+        <constructor>
+            <idArg column="user_id" javaType="java.lang.Long"/>
+            <arg column="email" javaType="java.lang.String"/>
+            <arg column="password_hash" javaType="java.lang.String"/>
+            <arg column="display_name" javaType="java.lang.String"/>
+            <arg column="role" javaType="java.lang.String"/>
+            <arg column="enabled" javaType="java.lang.Boolean"/>
+            <arg column="last_login_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="created_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="updated_at" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.jiber.backend.auth.SocialAccountInsertCommand">
+        INSERT INTO user_social_accounts (
+            user_id,
+            oauth_provider,
+            provider_user_id,
+            provider_email,
+            provider_display_name,
+            linked_at,
+            last_login_at
+        ) VALUES (
+            #{userId},
+            #{oauthProvider},
+            #{providerUserId},
+            #{providerEmail},
+            #{providerDisplayName},
+            #{linkedAt},
+            #{lastLoginAt}
+        )
+    </insert>
+
+    <select id="findByProvider" resultMap="SocialAccountRecordMap">
+        SELECT
+            social_account_id,
+            user_id,
+            oauth_provider,
+            provider_user_id,
+            provider_email,
+            provider_display_name,
+            linked_at,
+            last_login_at,
+            created_at,
+            updated_at
+        FROM user_social_accounts
+        WHERE oauth_provider = #{oauthProvider}
+          AND provider_user_id = #{providerUserId}
+    </select>
+
+    <select id="findLinkedUserByProvider" resultMap="AuthUserRecordMap">
+        SELECT
+            u.user_id,
+            u.email,
+            u.password_hash,
+            u.display_name,
+            u.role,
+            u.enabled,
+            u.last_login_at,
+            u.created_at,
+            u.updated_at
+        FROM user_social_accounts sa
+        INNER JOIN users u
+            ON u.user_id = sa.user_id
+        WHERE sa.oauth_provider = #{oauthProvider}
+          AND sa.provider_user_id = #{providerUserId}
+    </select>
+
+    <select id="findByUserId" resultMap="SocialAccountRecordMap">
+        SELECT
+            social_account_id,
+            user_id,
+            oauth_provider,
+            provider_user_id,
+            provider_email,
+            provider_display_name,
+            linked_at,
+            last_login_at,
+            created_at,
+            updated_at
+        FROM user_social_accounts
+        WHERE user_id = #{userId}
+        ORDER BY linked_at ASC, social_account_id ASC
+    </select>
+
+    <update id="updateLastLoginAt">
+        UPDATE user_social_accounts
+        SET last_login_at = #{lastLoginAt},
+            updated_at = CURRENT_TIMESTAMP(6)
+        WHERE oauth_provider = #{oauthProvider}
+          AND provider_user_id = #{providerUserId}
+    </update>
+</mapper>

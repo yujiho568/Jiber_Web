@@ -2,7 +2,14 @@ import { defineStore } from 'pinia'
 
 import { authApi } from '@/api/auth'
 import { getApiErrorMessage } from '@/api/client'
-import type { AuthUser } from '@/api/types'
+import type {
+  AuthLoginRequest,
+  AuthSessionResponse,
+  AuthSignupRequest,
+  AuthUser,
+  SocialLinkRequest,
+  SocialSignupRequest
+} from '@/api/types'
 
 interface AuthSessionPayload {
   accessToken: string
@@ -33,6 +40,14 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    setSessionFromResponse(response: AuthSessionResponse) {
+      this.setSession({
+        accessToken: response.accessToken,
+        user: response.user
+      })
+      this.bootstrapped = true
+    },
+
     setSession(payload: AuthSessionPayload) {
       this.accessToken = payload.accessToken
       this.user = payload.user
@@ -64,6 +79,70 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         this.clearSession()
         this.errorMessage = getApiErrorMessage(error, '로그인 정보를 확인하지 못했습니다.')
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async loginWithPassword(payload: AuthLoginRequest) {
+      this.loading = true
+      this.errorMessage = null
+
+      try {
+        const response = await authApi.login(payload)
+        this.setSessionFromResponse(response)
+      } catch (error) {
+        this.clearSession()
+        this.errorMessage = getApiErrorMessage(error, '로그인하지 못했습니다.')
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async signupWithPassword(payload: AuthSignupRequest) {
+      this.loading = true
+      this.errorMessage = null
+
+      try {
+        const response = await authApi.signup(payload)
+        this.setSessionFromResponse(response)
+      } catch (error) {
+        this.clearSession()
+        this.errorMessage = getApiErrorMessage(error, '회원가입을 완료하지 못했습니다.')
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async completeSocialSignup(payload: SocialSignupRequest) {
+      this.loading = true
+      this.errorMessage = null
+
+      try {
+        const response = await authApi.completeSocialSignup(payload)
+        this.setSessionFromResponse(response)
+      } catch (error) {
+        this.clearSession()
+        this.errorMessage = getApiErrorMessage(error, '소셜 회원가입을 완료하지 못했습니다.')
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async linkPendingSocialAccount(payload: SocialLinkRequest) {
+      this.loading = true
+      this.errorMessage = null
+
+      try {
+        const response = await authApi.linkPendingSocialAccount(payload)
+        this.setSessionFromResponse(response)
+      } catch (error) {
+        this.clearSession()
+        this.errorMessage = getApiErrorMessage(error, '소셜 계정을 연결하지 못했습니다.')
         throw error
       } finally {
         this.loading = false

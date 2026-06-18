@@ -42,6 +42,50 @@ describe('useAuthStore', () => {
     expect(sessionStorage.getItem('accessToken')).toBeNull()
   })
 
+  it('keeps the access token in Pinia memory only after email login', async () => {
+    vi.spyOn(authApi, 'login').mockResolvedValueOnce({
+      accessToken: 'memory-only-login-token',
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      user: {
+        userId: 2,
+        email: 'login@example.com',
+        displayName: '로그인 사용자',
+        roles: ['USER']
+      }
+    })
+
+    const store = useAuthStore()
+    await store.loginWithPassword({ email: 'login@example.com', password: 'password-8' })
+
+    expect(store.accessToken).toBe('memory-only-login-token')
+    expect(store.user?.displayName).toBe('로그인 사용자')
+    expect(localStorage.getItem('accessToken')).toBeNull()
+    expect(sessionStorage.getItem('accessToken')).toBeNull()
+  })
+
+  it('keeps the access token in Pinia memory only after social link', async () => {
+    vi.spyOn(authApi, 'linkPendingSocialAccount').mockResolvedValueOnce({
+      accessToken: 'memory-only-social-token',
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      user: {
+        userId: 3,
+        email: 'linked@example.com',
+        displayName: '연결 사용자',
+        roles: ['USER']
+      }
+    })
+
+    const store = useAuthStore()
+    await store.linkPendingSocialAccount({ email: 'linked@example.com', password: 'password-8' })
+
+    expect(store.accessToken).toBe('memory-only-social-token')
+    expect(store.user?.email).toBe('linked@example.com')
+    expect(localStorage.getItem('accessToken')).toBeNull()
+    expect(sessionStorage.getItem('accessToken')).toBeNull()
+  })
+
   it('clears memory auth state after logout', async () => {
     vi.spyOn(authApi, 'logout').mockResolvedValueOnce({
       message: '로그아웃되었습니다.'

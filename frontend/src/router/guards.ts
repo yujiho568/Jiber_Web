@@ -2,7 +2,7 @@ import type { RouteMeta } from 'vue-router'
 
 import type { UserRole } from '@/api/types'
 
-export type RouteAccessReason = 'AUTH_REQUIRED' | 'ACCESS_DENIED'
+export type RouteAccessReason = 'AUTH_REQUIRED' | 'ACCESS_DENIED' | 'ALREADY_AUTHENTICATED'
 
 export interface RouteAccessResult {
   allowed: boolean
@@ -13,9 +13,22 @@ export interface RouteAccessResult {
 export interface ProtectedRouteMeta extends RouteMeta {
   requiresAuth?: boolean
   roles?: UserRole[]
+  guestOnly?: boolean
 }
 
-export function canAccessRoute(meta: ProtectedRouteMeta, roles: UserRole[] | null): RouteAccessResult {
+export function canAccessRoute(
+  meta: ProtectedRouteMeta,
+  roles: UserRole[] | null,
+  isAuthenticated = Boolean(roles?.length)
+): RouteAccessResult {
+  if (meta.guestOnly && isAuthenticated) {
+    return {
+      allowed: false,
+      reason: 'ALREADY_AUTHENTICATED',
+      message: '이미 로그인되어 있습니다.'
+    }
+  }
+
   if (!meta.requiresAuth) {
     return { allowed: true }
   }

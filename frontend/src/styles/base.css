@@ -189,7 +189,8 @@ a {
 .result-panel,
 .info-panel,
 .callback-panel,
-.admin-form {
+.admin-form,
+.auth-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -279,7 +280,8 @@ a {
 .result-panel,
 .info-panel,
 .admin-form,
-.callback-panel {
+.callback-panel,
+.auth-panel {
   padding: 20px;
 }
 
@@ -302,7 +304,8 @@ fieldset {
 
 legend,
 .field-label,
-.admin-form label {
+.admin-form label,
+.auth-form label {
   display: block;
   margin-bottom: 8px;
   color: #1f2937;
@@ -534,7 +537,8 @@ input[type="range"] {
 
 .search-row input,
 .admin-form input,
-.admin-form textarea {
+.admin-form textarea,
+.auth-form input {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -552,6 +556,83 @@ input[type="range"] {
   display: grid;
   gap: 16px;
   max-width: 760px;
+}
+
+.auth-layout {
+  display: grid;
+  gap: 20px;
+  max-width: 760px;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.social-auth-panel {
+  max-width: 860px;
+}
+
+.auth-form,
+.provider-list {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+
+.inline-link {
+  color: var(--brand-strong);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.social-preview {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.social-preview strong {
+  overflow-wrap: anywhere;
+}
+
+.auth-section {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.auth-section + .auth-section {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.auth-section h2 {
+  margin: 0;
+  font-size: 1.12rem;
 }
 
 .callback-panel {

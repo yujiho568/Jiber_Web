@@ -37,6 +37,24 @@ export const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
+      meta: { requiresAuth: false, guestOnly: true }
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: () => import('@/views/SignupView.vue'),
+      meta: { requiresAuth: false, guestOnly: true }
+    },
+    {
+      path: '/signup/social',
+      name: 'social-signup',
+      component: () => import('@/views/SocialSignupView.vue'),
+      meta: { requiresAuth: false, guestOnly: true }
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('@/views/AdminView.vue'),
@@ -64,13 +82,31 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   const meta = to.meta as ProtectedRouteMeta
 
+  if (meta.guestOnly && !authStore.isAuthenticated) {
+    await authStore.restoreSessionFromCookie()
+  }
+
   if (meta.requiresAuth && !authStore.isAuthenticated) {
     await authStore.restoreSessionFromCookie()
   }
 
-  const access = canAccessRoute(meta, authStore.user?.roles ?? null)
+  const access = canAccessRoute(meta, authStore.user?.roles ?? null, authStore.isAuthenticated)
   if (access.allowed) {
     return true
+  }
+
+  if (access.reason === 'ALREADY_AUTHENTICATED') {
+    return { name: 'map' }
+  }
+
+  if (access.reason === 'AUTH_REQUIRED') {
+    return {
+      name: 'login',
+      query: {
+        auth: access.reason,
+        redirect: to.fullPath
+      }
+    }
   }
 
   return {

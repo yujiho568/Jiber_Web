@@ -1,5 +1,7 @@
 export type UserRole = 'USER' | 'ADMIN'
 
+export type OAuthProviderCode = 'GOOGLE' | 'KAKAO' | 'NAVER'
+
 export type PropertyType = 'APARTMENT' | 'OFFICETEL' | 'VILLA' | 'HOUSE'
 
 export type TransactionType = 'SALE' | 'JEONSE' | 'MONTHLY_RENT'
@@ -50,9 +52,31 @@ export interface AuthRefreshResponse {
   user: AuthUser
 }
 
+export interface AuthLoginRequest {
+  email: string
+  password: string
+}
+
+export interface AuthSignupRequest extends AuthLoginRequest {
+  displayName: string
+}
+
+export type AuthSessionResponse = AuthRefreshResponse
+
 export interface AuthLogoutResponse {
   message: string
 }
+
+export interface PendingSocialSignupResponse {
+  provider: OAuthProviderCode
+  email?: string | null
+  displayName?: string | null
+  matchingEmailAccountExists: boolean
+}
+
+export interface SocialSignupRequest extends AuthSignupRequest {}
+
+export interface SocialLinkRequest extends AuthLoginRequest {}
 
 export interface LatestTransaction {
   transactionType: TransactionType

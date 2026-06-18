@@ -26,6 +26,40 @@ cd backend
 mvn test
 ```
 
+## Auth E2E Smoke Schema Preflight
+
+이메일/비밀번호 signup/login, pending social signup/link, OAuth callback smoke는 최신 auth schema를 전제로 합니다. 오래된 local Docker volume이 `db/004_auth_account_social_link.sql` 적용 전이면 `POST /api/v1/auth/signup`가 `users.password_hash` 누락 등으로 500을 반환할 수 있습니다.
+
+Auth UX smoke 전에 root에서 읽기 전용 preflight를 실행합니다. 이 script는 `.env`를 읽을 수 있지만 DB password, connection string, email, provider subject, token 값은 출력하지 않고 `information_schema`만 조회합니다. DDL이나 migration은 실행하지 않습니다.
+
+```bash
+scripts/check-auth-schema.sh
+```
+
+확인 항목:
+
+- `users.password_hash` column
+- `users.email unique` index, 현재 migration 기준 이름은 `uk_users_email`
+- `user_social_accounts` table
+- `oauth_pending_social_sessions` table
+
+실패하면 auth UX smoke를 중단하고 `004 migration 미적용` 또는 부분 적용 상태로 봅니다. 기존 DB를 즉시 수정하지 말고 먼저 backup 또는 Docker volume snapshot을 남깁니다.
+
+선택지:
+
+- Fresh local DB smoke: 새 local DB 또는 새 Docker volume을 준비해 `001 -> 002 -> 003 -> 004`가 처음부터 순서대로 적용되게 합니다. 기존 volume을 임의로 삭제하지 말고, 필요한 경우 Architecture / Design Agent 또는 QA와 DB 보존 여부를 확인합니다.
+- Existing local DB migration: 아래 `004 Auth Account Migration Runbook`의 duplicate legacy email preflight와 cleanup policy를 먼저 확인합니다. 004는 one-shot migration이므로 중복 정리가 끝난 뒤 `db/004_auth_account_social_link.sql`을 한 번만 적용하고, 성공 후에는 재실행하지 않습니다.
+
+Schema preflight가 통과한 뒤 smoke 순서:
+
+1. Backend를 실행합니다.
+2. Frontend를 실행합니다.
+3. dummy email/password signup을 수행하고 refresh cookie가 HttpOnly로 설정되는지만 확인합니다. 응답 token, cookie 값, raw password는 터미널이나 이슈에 붙여 넣지 않습니다.
+4. logout으로 refresh cookie clear와 서버 session revoke를 확인합니다.
+5. 같은 dummy 계정으로 login 후 `POST /api/v1/auth/refresh`를 credentials 포함으로 호출해 access token body 계약과 refresh cookie rotation을 확인합니다.
+6. pending social signup/link smoke는 실제 provider token 값을 출력하지 않고 `/signup/social` 수동 흐름에서 pending cookie 존재와 safe error만 확인합니다.
+7. Google/Kakao/Naver 실제 provider E2E는 사용자 인증이 필요한 별도 수동 단계로 분리합니다.
+
 ## Environment Variables
 
 루트 `.env.example`의 값을 사용합니다. 실제 secret 값은 커밋하지 않습니다.
@@ -113,8 +147,9 @@ mvn test
 - refresh token reuse가 감지되면 재사용된 session과 그 descendant/current session family를 revoke하고 `AUTH_REQUIRED`를 반환합니다.
 - 현재 security skeleton은 `AUTH_REQUIRED`, `ACCESS_DENIED`를 공통 error shape로 반환합니다.
 - credentialed CORS에서는 wildcard origin을 허용하지 않으며, `BACKEND_CORS_ALLOWED_ORIGINS`에 `*`가 포함되면 fail-fast 처리합니다.
-- 현재 OAuth2 success handler는 provider callback 후 local user를 자동 생성/로그인하는 구현입니다. 이 흐름은 `docs/contracts/auth-flow.md`의 새 목표 계약에 맞춰 이메일/비밀번호 계정 + 소셜 계정 연동 구조로 교체해야 합니다.
-- 목표 구조에서는 OAuth callback이 이미 연결된 social account만 바로 로그인합니다. 미연결 provider identity는 pending social session을 만들고 `/signup/social`에서 신규 가입 또는 기존 계정 연동을 완료하게 해야 합니다.
+- OAuth2 success handler는 linked social subject만 refresh cookie 설정 후 `FRONTEND_PUBLIC_BASE_URL/login/callback`으로 redirect합니다.
+- 미연결 provider identity는 local user를 자동 생성하지 않고 pending social session과 HttpOnly pending cookie를 만든 뒤 `FRONTEND_PUBLIC_BASE_URL/signup/social`로 redirect합니다.
+- matching email만으로 social account를 자동 link하지 않습니다. 기존 계정 link는 pending cookie와 email/password 재인증을 통과한 뒤에만 수행합니다.
 - 최초 `ADMIN` 권한은 자동 부여하지 않습니다. 별도 seed, migration, 또는 운영 script에서 명시 user ID/email allowlist로 처리해야 합니다.
 
 ### Auth Environment Variables
@@ -224,6 +259,8 @@ schema 초안은 `../db/001_phase1_schema.sql`입니다.
 
 `../db/004_auth_account_social_link.sql`은 provider-owned legacy `users`를 email/password account와 `user_social_accounts`로 분리하는 versioned one-shot migration입니다. 성공한 파일은 재실행하지 않습니다. 성공 후 재실행하면 `password_hash` column 또는 `uk_users_email` key가 이미 존재해 실패할 수 있습니다.
 
+Auth E2E smoke 전에는 `scripts/check-auth-schema.sh`를 먼저 실행해 `users.password_hash`, `users.email unique`, `user_social_accounts`, `oauth_pending_social_sessions`가 모두 있는지 확인합니다.
+
 004는 DDL 전에 duplicate legacy email preflight를 수행합니다. 같은 normalized email이 여러 legacy OAuth user에 있으면 자동 merge하지 않고 `JIBER_AUTH_MIGRATION_DUPLICATE_EMAIL`로 중단합니다. 이 실패는 DDL 전에 발생하므로 cleanup 후 004를 다시 실행할 수 있습니다.
 
 실행 전 duplicate legacy email 진단:
@@ -273,6 +310,7 @@ docker compose up -d mysql
 db/001_phase1_schema.sql
 db/002_public_data_import.sql
 db/003_seed_sample_properties.sql
+db/004_auth_account_social_link.sql
 ```
 
 이미 volume이 존재하는 상태에서 seed를 다시 적용하려면 `.env`를 로드한 뒤 필요한 SQL만 직접 실행합니다.
@@ -281,7 +319,7 @@ db/003_seed_sample_properties.sql
 set -a
 source .env
 set +a
-docker compose exec -T mysql mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < db/003_seed_sample_properties.sql
+docker compose exec -T mysql sh -c 'MYSQL_PWD="${MYSQL_PASSWORD:-}" mysql -u"${MYSQL_USER:-jiber}" "${MYSQL_DATABASE:-jiber}"' < db/003_seed_sample_properties.sql
 ```
 
 `db/003_seed_sample_properties.sql`은 지도 검색, 필터 검색, 상세 조회 smoke test용 synthetic seed입니다. 실거래 원천 데이터나 투자 판단 근거로 사용하지 않습니다.

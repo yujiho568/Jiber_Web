@@ -40,6 +40,26 @@ class AuthMigrationScriptTest {
     }
 
     @Test
+    void authAccountMigrationRunbookUsesOnlyFullGroupByCompatibleSanitizedDuplicateEmailDetailQuery()
+            throws Exception {
+        var readme = Files.readString(Path.of("README.md"));
+        var detailQuery = extractSqlBlockAfter(readme, "실행 전 duplicate legacy email 진단:");
+
+        assertThat(detailQuery).contains("SHA2(normalized_email, 256) AS email_sha256");
+        assertThat(detailQuery).contains("legacy_user_count");
+        assertThat(detailQuery).contains("user_ids");
+        assertThat(detailQuery).contains("providers");
+        assertThat(detailQuery).contains("FROM (");
+        assertThat(detailQuery).contains("LOWER(TRIM(email)) AS normalized_email");
+        assertThat(detailQuery).contains("GROUP BY LOWER(TRIM(email))");
+        assertThat(detailQuery).contains("HAVING COUNT(*) > 1");
+        assertThat(detailQuery).contains(") duplicate_emails");
+        assertThat(detailQuery).doesNotContain("SHA2(LOWER(TRIM(email)), 256)");
+        assertThat(detailQuery).doesNotContain("provider_user_id");
+        assertThat(detailQuery).doesNotContain("SELECT\n    email");
+    }
+
+    @Test
     void authSchemaPreflightScriptDocumentsRequiredChecksWithoutMutationSql() throws Exception {
         var script = Files.readString(Path.of("..", "scripts", "check-auth-schema.sh"));
         var readme = Files.readString(Path.of("README.md"));
@@ -72,5 +92,21 @@ class AuthMigrationScriptTest {
         assertThat(readme).contains("linked social subject");
         assertThat(readme).contains("email/password 재인증");
         assertThat(rootReadme).contains("scripts/check-auth-schema.sh");
+    }
+
+    private static String extractSqlBlockAfter(String text, String marker) {
+        var markerIndex = text.indexOf(marker);
+        assertThat(markerIndex).isGreaterThanOrEqualTo(0);
+
+        var fenceStart = text.indexOf("```sql", markerIndex);
+        assertThat(fenceStart).isGreaterThanOrEqualTo(0);
+
+        var blockStart = text.indexOf('\n', fenceStart);
+        assertThat(blockStart).isGreaterThanOrEqualTo(0);
+
+        var fenceEnd = text.indexOf("```", blockStart + 1);
+        assertThat(fenceEnd).isGreaterThanOrEqualTo(0);
+
+        return text.substring(blockStart + 1, fenceEnd);
     }
 }

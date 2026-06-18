@@ -267,15 +267,22 @@ Auth E2E smoke 전에는 `scripts/check-auth-schema.sh`를 먼저 실행해 `use
 
 ```sql
 SELECT
-    SHA2(LOWER(TRIM(email)), 256) AS email_sha256,
-    COUNT(*) AS legacy_user_count,
-    GROUP_CONCAT(user_id ORDER BY user_id) AS user_ids,
-    GROUP_CONCAT(DISTINCT oauth_provider ORDER BY oauth_provider SEPARATOR ',') AS providers
-FROM users
-WHERE email IS NOT NULL
-  AND TRIM(email) <> ''
-GROUP BY LOWER(TRIM(email))
-HAVING COUNT(*) > 1;
+    SHA2(normalized_email, 256) AS email_sha256,
+    legacy_user_count,
+    user_ids,
+    providers
+FROM (
+    SELECT
+        LOWER(TRIM(email)) AS normalized_email,
+        COUNT(*) AS legacy_user_count,
+        GROUP_CONCAT(user_id ORDER BY user_id) AS user_ids,
+        GROUP_CONCAT(DISTINCT oauth_provider ORDER BY oauth_provider SEPARATOR ',') AS providers
+    FROM users
+    WHERE email IS NOT NULL
+      AND TRIM(email) <> ''
+    GROUP BY LOWER(TRIM(email))
+    HAVING COUNT(*) > 1
+) duplicate_emails;
 ```
 
 이 진단은 email 원문과 provider subject 전체값을 출력하지 않습니다. `email_sha256`, user id, provider 종류만 보고 중복 그룹을 식별한 뒤 운영자가 canonical user를 결정해야 합니다.

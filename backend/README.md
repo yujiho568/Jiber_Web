@@ -321,6 +321,24 @@ docker compose up -d mysql
 
 호스트의 3306 포트를 이미 다른 MySQL이 사용 중이면 `.env`의 `DB_PORT`를 예: `3307`로 바꾼 뒤 실행합니다. Spring Boot smoke test도 같은 `DB_PORT` 값으로 실행해야 Docker MySQL을 조회합니다.
 
+현재 Docker published port는 다음처럼 확인합니다. 이 명령은 port만 확인하며 `.env` 값은 출력하지 않습니다.
+
+```bash
+docker compose ps mysql
+# 또는
+docker ps --filter name=jiber-mysql --format "table {{.Names}}\t{{.Ports}}"
+```
+
+`Ports`에 `0.0.0.0:3307->3306/tcp`처럼 표시되면 `.env`의 `DB_PORT`도 `3307`이어야 합니다. `.env`를 export한 상태에서 일회성으로만 맞출 때는 port만 override합니다. DB password는 `.env` 또는 shell 환경으로만 주입하고 command line에 직접 쓰지 않습니다.
+
+```bash
+cd backend
+set -a
+source ../.env
+set +a
+DB_PORT=3307 JIBER_MYSQL_SMOKE=true mvn -Dtest=CanonicalApartmentUpsertMySqlSmokeTest test
+```
+
 처음 생성되는 Docker volume에는 `db/`의 SQL 파일이 파일명 순서대로 적용됩니다.
 
 ```text

@@ -42,10 +42,11 @@ Phase 1 로컬 개발 흐름은 다음 순서입니다.
 2. `docker compose up -d mysql`로 MySQL 8을 실행합니다.
 3. 처음 생성되는 Docker volume에는 `db/001_phase1_schema.sql`, `db/002_public_data_import.sql`, `db/003_seed_sample_properties.sql`, `db/004_auth_account_social_link.sql`, `db/005_property_transaction_source_unique.sql`이 순서대로 적용됩니다.
 4. auth UX smoke 전에는 `scripts/check-auth-schema.sh`를 실행해 오래된 local DB volume에 004 auth migration이 빠져 있지 않은지 확인합니다. 이 preflight는 schema만 읽고 secret 값을 출력하지 않습니다.
-5. `backend/`에서 Spring Boot API 서버를 실행합니다.
-6. `model-server/`에서 FastAPI 모델 서버를 실행합니다.
-7. `frontend/`에서 Vite 개발 서버를 실행합니다.
-8. 프론트엔드는 Spring Boot API의 `/api/v1/**`만 호출하고, Spring Boot가 내부적으로 모델 서버를 호출합니다.
+5. DB-backed smoke test 전에는 Docker published port와 `.env`의 `DB_PORT`가 일치하는지 확인합니다. 자세한 MySQL smoke 예시는 `backend/README.md`를 참고합니다.
+6. `backend/`에서 Spring Boot API 서버를 실행합니다.
+7. `model-server/`에서 FastAPI 모델 서버를 실행합니다.
+8. `frontend/`에서 Vite 개발 서버를 실행합니다.
+9. 프론트엔드는 Spring Boot API의 `/api/v1/**`만 호출하고, Spring Boot가 내부적으로 모델 서버를 호출합니다.
 
 공공데이터포털 실거래 import는 backend batch runner로 실행합니다. 현재 seed 데이터는 map/search/detail API smoke test용 synthetic 데이터이며, live public data import와 Kakao geocoding은 별도 실행 단계입니다. 로컬 개발에서는 Docker MySQL 또는 로컬 MySQL을 사용할 수 있고, 운영에서는 Docker MySQL 또는 managed DB 중 운영 기준에 맞게 선택합니다. 실제 public data service key와 Kakao REST API key는 `.env`에만 둡니다.
 

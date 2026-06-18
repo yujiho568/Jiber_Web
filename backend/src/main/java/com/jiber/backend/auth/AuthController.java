@@ -80,6 +80,19 @@ public class AuthController {
         return result.response();
     }
 
+    @PostMapping("/social/link")
+    public AuthTokenResponse socialLink(
+            @CookieValue(name = "${jiber.auth.pending-social.cookie.name:JIBER_PENDING_SOCIAL}", required = false) String pendingToken,
+            @Valid @RequestBody SocialLinkRequest linkRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        var result = socialLoginService.socialLink(pendingToken, linkRequest, RefreshRequestContext.from(request));
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookieService.createRefreshCookie(result.refreshToken()).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, pendingSocialCookieService.clearPendingCookie().toString());
+        return result.response();
+    }
+
     @PostMapping("/refresh")
     public AuthTokenResponse refresh(
             @CookieValue(name = "${jiber.auth.refresh-token.cookie.name:JIBER_REFRESH_TOKEN}", required = false) String refreshToken,

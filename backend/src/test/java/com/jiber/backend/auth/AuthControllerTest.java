@@ -225,6 +225,42 @@ class AuthControllerTest {
         assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isEqualTo(fixture.pendingSocialSessionService.hash(issued.token()));
     }
 
+    @Test
+    void socialLinkSetsRefreshCookieClearsPendingCookieAndReturnsAccessToken() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(
+                20L,
+                "owner@example.com",
+                fixture.passwordEncoder.encode(CREDENTIAL),
+                "기존 사용자",
+                true
+        );
+        var issued = fixture.pendingSocialSessionService.issue(
+                new OAuth2ProviderUser(OAuth2Provider.NAVER, "naver-user-3", "provider@example.com", "제공자 이름")
+        );
+        var request = new MockHttpServletRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("User-Agent", "JUnit");
+        var response = new MockHttpServletResponse();
+
+        var body = fixture.controller().socialLink(
+                issued.token(),
+                new SocialLinkRequest(" OWNER@example.com ", CREDENTIAL),
+                request,
+                response
+        );
+
+        assertThat(body.accessToken()).isNotBlank();
+        assertThat(body.user().email()).isEqualTo("owner@example.com");
+        assertThat(body.user().roles()).containsExactly("USER");
+        assertThat(body.user().roles()).doesNotContain("ADMIN");
+        assertThat(response.getHeaders("Set-Cookie"))
+                .anySatisfy(cookie -> assertThat(cookie).contains("JIBER_REFRESH_TOKEN=").contains("HttpOnly"))
+                .anySatisfy(cookie -> assertThat(cookie).contains("JIBER_PENDING_SOCIAL=").contains("Max-Age=0").contains("HttpOnly"));
+        assertThat(fixture.socialAccountMapper.findByProvider("NAVER", "naver-user-3").userId()).isEqualTo(20L);
+        assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isEqualTo(fixture.pendingSocialSessionService.hash(issued.token()));
+    }
+
     private ApiException catchApiException(ThrowingRunnable runnable) {
         try {
             runnable.run();

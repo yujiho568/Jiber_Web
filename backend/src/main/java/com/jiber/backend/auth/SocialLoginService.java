@@ -198,6 +198,67 @@ public class SocialLoginService {
         return startSession(user, context);
     }
 
+    @Transactional
+    public AuthRefreshResult socialLink(String pendingToken, SocialLinkRequest request, RefreshRequestContext context) {
+        var session = pendingSocialSessionService.requireActive(pendingToken);
+        var user = authenticateExistingUser(request);
+
+        if (socialAccountMapper.findByProvider(session.oauthProvider(), session.providerUserId()) != null) {
+            throw socialAccountAlreadyLinked();
+        }
+        if (userAlreadyLinkedProvider(user.userId(), session.oauthProvider())) {
+            throw socialAccountAlreadyLinked();
+        }
+
+        var now = OffsetDateTime.now(clock);
+        try {
+            socialAccountMapper.insert(new SocialAccountInsertCommand(
+                    user.userId(),
+                    session.oauthProvider(),
+                    session.providerUserId(),
+                    session.providerEmail(),
+                    session.providerDisplayName(),
+                    now,
+                    now
+            ));
+        } catch (DuplicateKeyException exception) {
+            throw socialAccountAlreadyLinked();
+        }
+
+        pendingSocialSessionService.consume(pendingToken);
+        authUserMapper.updateLastLoginAt(user.userId(), now);
+        var updatedUser = authUserMapper.findById(user.userId());
+        return startSession(updatedUser == null ? user : updatedUser, context);
+    }
+
+    private AuthUserRecord authenticateExistingUser(SocialLinkRequest request) {
+        var normalizedEmail = emailNormalizer.normalize(request.email());
+        var user = StringUtils.hasText(normalizedEmail) ? authUserMapper.findByEmail(normalizedEmail) : null;
+        if (user == null || Boolean.FALSE.equals(user.enabled()) || !StringUtils.hasText(user.passwordHash())) {
+            throw invalidCredentials();
+        }
+        if (!matches(request.password(), user.passwordHash())) {
+            throw invalidCredentials();
+        }
+        return user;
+    }
+
+    private boolean userAlreadyLinkedProvider(Long userId, String oauthProvider) {
+        return socialAccountMapper.findByUserId(userId).stream()
+                .anyMatch(account -> account.oauthProvider().equals(oauthProvider));
+    }
+
+    private boolean matches(String candidate, String passwordHash) {
+        if (!StringUtils.hasText(candidate)) {
+            return false;
+        }
+        try {
+            return passwordEncoder.matches(candidate, passwordHash);
+        } catch (RuntimeException exception) {
+            return false;
+        }
+    }
+
     private AuthRefreshResult startSession(AuthUserRecord user, RefreshRequestContext context) {
         var principal = user.toPrincipal();
         var refreshToken = refreshTokenService.issue(user.userId(), context);
@@ -227,6 +288,10 @@ public class SocialLoginService {
 
     private ApiException emailAlreadyExists() {
         return new ApiException(ErrorCode.EMAIL_ALREADY_EXISTS, ErrorCode.EMAIL_ALREADY_EXISTS.defaultMessage(), List.of());
+    }
+
+    private ApiException invalidCredentials() {
+        return new ApiException(ErrorCode.INVALID_CREDENTIALS, ErrorCode.INVALID_CREDENTIALS.defaultMessage(), List.of());
     }
 
     private ApiException socialAccountAlreadyLinked() {

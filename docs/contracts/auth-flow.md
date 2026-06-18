@@ -77,7 +77,7 @@ Base path: `/api/v1`
 | Email login | `POST /auth/login` | `ANONYMOUS` | Verifies email/password and starts a session. |
 | Pending social state | `GET /auth/social/pending` | Pending social cookie | Returns provider/email/display-name hints for social signup/link UX. |
 | Social signup | `POST /auth/social/signup` | Pending social cookie | Creates a Jiber account, links the pending provider, and starts a session. |
-| Social link | `POST /auth/social/link` | `USER` or `ADMIN` + pending social cookie | Links the pending provider to the authenticated account. |
+| Social link | `POST /auth/social/link` | Pending social cookie + email/password re-auth | Links the pending provider to an existing account only after the account owner verifies email/password. |
 | Social account list | `GET /auth/social-accounts` | `USER` or `ADMIN` | Lists linked providers for the current account. |
 | Refresh | `POST /auth/refresh` | Refresh cookie | Requires valid refresh cookie and allowed origin. |
 | Logout | `POST /auth/logout` | Refresh cookie if present | Idempotent; invalidates current refresh state when available and clears cookie. |
@@ -214,14 +214,25 @@ Rules:
 
 `POST /api/v1/auth/social/link`
 
-Requires authenticated `USER` or `ADMIN` plus a valid pending social cookie.
+Requires a valid pending social cookie plus the existing account owner's email/password.
+
+Draft request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "plain-password-from-form"
+}
+```
 
 Rules:
 
-- Links the pending provider to the authenticated account.
-- Consumes the pending session and clears the pending cookie.
+- Verifies email/password using the same safe credential failure policy as email login.
+- Links the pending provider to the verified Jiber account.
+- Consumes the pending session, clears the pending cookie, creates a refresh session, sets the refresh cookie, and returns an access token response.
+- Wrong email, wrong password, disabled user, or account without a password hash returns `401 INVALID_CREDENTIALS`.
 - Already linked provider returns `409 SOCIAL_ACCOUNT_ALREADY_LINKED`.
-- Matching email alone is not enough; the authenticated user id is the linking authority.
+- Matching email alone is not enough; the user must pass email/password verification.
 
 ### Linked Social Accounts
 
@@ -369,7 +380,7 @@ Frontend / Map Agent:
 
 - Add `/login`, `/signup`, and `/signup/social` routes before relying on favorites as the next authenticated workflow.
 - After OAuth callback, call `POST /api/v1/auth/refresh` with credentials included.
-- After pending social callback, call `GET /api/v1/auth/social/pending` and guide the user to either social signup completion or existing-account linking.
+- After pending social callback, call `GET /api/v1/auth/social/pending` and guide the user to either social signup completion or existing-account linking through `POST /api/v1/auth/social/link` with email/password re-authentication.
 - Keep access token in memory only and attach it as `Authorization: Bearer <token>`.
 - Do not persist tokens in localStorage or sessionStorage.
 - Clear in-memory token on logout, refresh failure, or app auth reset.

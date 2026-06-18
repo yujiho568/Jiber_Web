@@ -183,7 +183,7 @@ class SecurityRulesTest {
     }
 
     @Test
-    void socialPendingAndSocialSignupAllowAnonymousButRequirePendingCookie() throws Exception {
+    void socialEndpointsAllowAnonymousButRequirePendingCookie() throws Exception {
         var body = """
                 {
                   "email": "social@example.com",
@@ -199,6 +199,19 @@ class SecurityRulesTest {
         mockMvc.perform(post("/api/v1/auth/social/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("SOCIAL_PENDING_NOT_FOUND"));
+
+        var linkBody = """
+                {
+                  "email": "social@example.com",
+                  "password": "valid-credential-1"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/auth/social/link")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(linkBody))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("SOCIAL_PENDING_NOT_FOUND"));
     }

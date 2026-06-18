@@ -142,6 +142,142 @@ class SocialLoginServiceTest {
         assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isNull();
     }
 
+    @Test
+    void socialLinkAuthenticatesExistingUserLinksProviderConsumesPendingAndStartsSession() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(1L, "owner@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "기존 사용자", true);
+        var issued = fixture.pendingSocialSessionService.issue(providerUser("social-link-user-1", "provider@example.com", "제공자 이름"));
+
+        var result = fixture.socialLoginService.socialLink(
+                issued.token(),
+                new SocialLinkRequest(" OWNER@example.com ", CREDENTIAL),
+                RefreshRequestContext.empty()
+        );
+
+        assertThat(result.response().accessToken()).isNotBlank();
+        assertThat(result.response().user().email()).isEqualTo("owner@example.com");
+        assertThat(result.response().user().roles()).containsExactly("USER");
+        assertThat(result.response().user().roles()).doesNotContain("ADMIN");
+        assertThat(result.refreshToken()).isNotBlank();
+
+        var socialAccount = fixture.socialAccountMapper.findByProvider("NAVER", "social-link-user-1");
+        assertThat(socialAccount).isNotNull();
+        assertThat(socialAccount.userId()).isEqualTo(1L);
+        assertThat(socialAccount.providerEmail()).isEqualTo("provider@example.com");
+        assertThat(socialAccount.providerDisplayName()).isEqualTo("제공자 이름");
+        assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isEqualTo(fixture.pendingSocialSessionService.hash(issued.token()));
+        assertThat(fixture.refreshSessionMapper.insertedTokenHash).hasSize(64);
+    }
+
+    @Test
+    void socialLinkWrongPasswordReturnsInvalidCredentialsAndDoesNotConsumePending() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(1L, "owner@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "기존 사용자", true);
+        var issued = fixture.pendingSocialSessionService.issue(providerUser("social-link-user-2", "owner@example.com", "제공자 이름"));
+
+        assertThatThrownBy(() -> fixture.socialLoginService.socialLink(
+                issued.token(),
+                new SocialLinkRequest("owner@example.com", "invalid-credential-1"),
+                RefreshRequestContext.empty()
+        ))
+                .isInstanceOf(ApiException.class)
+                .extracting(exception -> ((ApiException) exception).getErrorCode())
+                .isEqualTo(ErrorCode.INVALID_CREDENTIALS);
+
+        assertThat(fixture.socialAccountMapper.findByProvider("NAVER", "social-link-user-2")).isNull();
+        assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isNull();
+    }
+
+    @Test
+    void socialLinkRequiresActivePendingSession() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(1L, "owner@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "기존 사용자", true);
+
+        assertThatThrownBy(() -> fixture.socialLoginService.socialLink(
+                null,
+                new SocialLinkRequest("owner@example.com", CREDENTIAL),
+                RefreshRequestContext.empty()
+        ))
+                .isInstanceOf(ApiException.class)
+                .extracting(exception -> ((ApiException) exception).getErrorCode())
+                .isEqualTo(ErrorCode.SOCIAL_PENDING_NOT_FOUND);
+    }
+
+    @Test
+    void socialLinkProviderSubjectAlreadyLinkedReturnsSafeConflict() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(1L, "owner@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "기존 사용자", true);
+        fixture.authUserMapper.insertExistingUser(2L, "other@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "다른 사용자", true);
+        fixture.socialAccountMapper.insert(new SocialAccountInsertCommand(
+                2L,
+                "NAVER",
+                "social-link-user-3",
+                "other-provider@example.com",
+                "다른 제공자",
+                OffsetDateTime.now(FIXED_CLOCK),
+                OffsetDateTime.now(FIXED_CLOCK)
+        ));
+        var issued = fixture.pendingSocialSessionService.issue(providerUser("social-link-user-3", "provider@example.com", "제공자 이름"));
+
+        assertThatThrownBy(() -> fixture.socialLoginService.socialLink(
+                issued.token(),
+                new SocialLinkRequest("owner@example.com", CREDENTIAL),
+                RefreshRequestContext.empty()
+        ))
+                .isInstanceOf(ApiException.class)
+                .extracting(exception -> ((ApiException) exception).getErrorCode())
+                .isEqualTo(ErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
+
+        assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isNull();
+    }
+
+    @Test
+    void socialLinkSameUserAlreadyHasSameProviderReturnsSafeConflict() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(1L, "owner@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "기존 사용자", true);
+        fixture.socialAccountMapper.insert(new SocialAccountInsertCommand(
+                1L,
+                "NAVER",
+                "existing-provider-subject",
+                "existing-provider@example.com",
+                "기존 제공자",
+                OffsetDateTime.now(FIXED_CLOCK),
+                OffsetDateTime.now(FIXED_CLOCK)
+        ));
+        var issued = fixture.pendingSocialSessionService.issue(providerUser("social-link-user-4", "provider@example.com", "제공자 이름"));
+
+        assertThatThrownBy(() -> fixture.socialLoginService.socialLink(
+                issued.token(),
+                new SocialLinkRequest("owner@example.com", CREDENTIAL),
+                RefreshRequestContext.empty()
+        ))
+                .isInstanceOf(ApiException.class)
+                .extracting(exception -> ((ApiException) exception).getErrorCode())
+                .isEqualTo(ErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
+
+        assertThat(fixture.socialAccountMapper.findByProvider("NAVER", "social-link-user-4")).isNull();
+        assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isNull();
+    }
+
+    @Test
+    void matchingEmailDoesNotLinkBeforePasswordAuthentication() {
+        var fixture = new Fixture();
+        fixture.authUserMapper.insertExistingUser(1L, "owner@example.com", fixture.passwordEncoder.encode(CREDENTIAL), "기존 사용자", true);
+        var issued = fixture.pendingSocialSessionService.issue(providerUser("social-link-user-5", "owner@example.com", "제공자 이름"));
+
+        assertThatThrownBy(() -> fixture.socialLoginService.socialLink(
+                issued.token(),
+                new SocialLinkRequest("owner@example.com", "invalid-credential-1"),
+                RefreshRequestContext.empty()
+        ))
+                .isInstanceOf(ApiException.class)
+                .extracting(exception -> ((ApiException) exception).getErrorCode())
+                .isEqualTo(ErrorCode.INVALID_CREDENTIALS);
+
+        assertThat(fixture.socialAccountMapper.findByProvider("NAVER", "social-link-user-5")).isNull();
+        assertThat(fixture.pendingSocialSessionMapper.consumedTokenHash).isNull();
+    }
+
     private OAuth2ProviderUser providerUser(String providerUserId, String email, String displayName) {
         return new OAuth2ProviderUser(OAuth2Provider.NAVER, providerUserId, email, displayName);
     }

@@ -24,6 +24,8 @@ interface AuthState {
   errorMessage: string | null
 }
 
+let bootstrapSessionPromise: Promise<boolean> | null = null
+
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     accessToken: null,
@@ -151,6 +153,7 @@ export const useAuthStore = defineStore('auth', {
 
     async restoreSessionFromCookie(): Promise<boolean> {
       if (this.accessToken && this.user) {
+        this.bootstrapped = true
         return true
       }
 
@@ -171,6 +174,25 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
+    },
+
+    async bootstrapSessionFromCookie(): Promise<boolean> {
+      if (this.isAuthenticated) {
+        this.bootstrapped = true
+        return true
+      }
+
+      if (this.bootstrapped) {
+        return false
+      }
+
+      if (!bootstrapSessionPromise) {
+        bootstrapSessionPromise = this.restoreSessionFromCookie().finally(() => {
+          bootstrapSessionPromise = null
+        })
+      }
+
+      return bootstrapSessionPromise
     },
 
     async fetchMe() {

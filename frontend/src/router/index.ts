@@ -82,12 +82,8 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   const meta = to.meta as ProtectedRouteMeta
 
-  if (meta.guestOnly && !authStore.isAuthenticated) {
-    await authStore.restoreSessionFromCookie()
-  }
-
-  if (meta.requiresAuth && !authStore.isAuthenticated) {
-    await authStore.restoreSessionFromCookie()
+  if (to.name !== 'login-callback') {
+    await authStore.bootstrapSessionFromCookie()
   }
 
   const access = canAccessRoute(meta, authStore.user?.roles ?? null, authStore.isAuthenticated)

@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { authApi } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
@@ -9,6 +9,10 @@ describe('useAuthStore', () => {
     setActivePinia(createPinia())
     localStorage.clear()
     sessionStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('keeps the access token in Pinia memory only after callback refresh', async () => {
@@ -38,6 +42,54 @@ describe('useAuthStore', () => {
 
     expect(store.accessToken).toBe('memory-only-token')
     expect(store.user?.roles).toContain('USER')
+    expect(localStorage.getItem('accessToken')).toBeNull()
+    expect(sessionStorage.getItem('accessToken')).toBeNull()
+  })
+
+  it('bootstraps a session from refresh cookie only once for concurrent callers', async () => {
+    const refreshSpy = vi.spyOn(authApi, 'refresh').mockResolvedValue({
+      accessToken: 'memory-only-bootstrap-token',
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      user: {
+        userId: 4,
+        email: 'bootstrap@example.com',
+        displayName: '복원 사용자',
+        roles: ['USER']
+      }
+    })
+
+    const store = useAuthStore()
+    const [firstResult, secondResult] = await Promise.all([
+      store.bootstrapSessionFromCookie(),
+      store.bootstrapSessionFromCookie()
+    ])
+
+    expect(firstResult).toBe(true)
+    expect(secondResult).toBe(true)
+    expect(refreshSpy).toHaveBeenCalledTimes(1)
+    expect(store.user?.displayName).toBe('복원 사용자')
+  })
+
+  it('keeps public bootstrap failures silent and unauthenticated', async () => {
+    vi.spyOn(authApi, 'refresh').mockRejectedValueOnce({
+      isAxiosError: true,
+      response: {
+        data: {
+          code: 'AUTH_REQUIRED',
+          message: '로그인이 필요합니다.',
+          path: '/api/v1/auth/refresh',
+          timestamp: '2026-06-18T00:00:00+09:00'
+        }
+      }
+    })
+
+    const store = useAuthStore()
+    const restored = await store.bootstrapSessionFromCookie()
+
+    expect(restored).toBe(false)
+    expect(store.isAuthenticated).toBe(false)
+    expect(store.errorMessage).toBeNull()
     expect(localStorage.getItem('accessToken')).toBeNull()
     expect(sessionStorage.getItem('accessToken')).toBeNull()
   })

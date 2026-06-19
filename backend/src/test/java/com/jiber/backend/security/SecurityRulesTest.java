@@ -1,7 +1,9 @@
 package com.jiber.backend.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -11,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiber.backend.auth.AuthController;
 import com.jiber.backend.auth.AuthService;
+import com.jiber.backend.auth.AuthUserPrincipal;
 import com.jiber.backend.auth.AuthUserMapper;
 import com.jiber.backend.auth.AuthUserRecord;
 import com.jiber.backend.auth.EmailNormalizer;
@@ -33,16 +36,22 @@ import com.jiber.backend.auth.SocialAccountInsertCommand;
 import com.jiber.backend.auth.SocialAccountMapper;
 import com.jiber.backend.auth.SocialAccountRecord;
 import com.jiber.backend.auth.SocialLoginService;
+import com.jiber.backend.favorite.FavoriteApartmentRow;
 import com.jiber.backend.favorite.FavoriteController;
+import com.jiber.backend.favorite.FavoriteMapper;
 import com.jiber.backend.favorite.FavoriteService;
 import com.jiber.backend.notice.AdminNoticeController;
 import com.jiber.backend.notice.NoticeService;
+import com.jiber.backend.property.PropertyType;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +61,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -226,9 +237,28 @@ class SecurityRulesTest {
     @Test
     void userCanAccessFavorites() throws Exception {
         mockMvc.perform(get("/api/v1/favorites/apartments")
-                        .with(user("1").roles("USER")))
+                        .with(authentication(authPrincipal(1L, "USER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isArray());
+    }
+
+    @Test
+    void favoriteMutationsRequireAuthentication() throws Exception {
+        var body = """
+                {
+                  "propertyId": 1001
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/favorites/apartments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+
+        mockMvc.perform(delete("/api/v1/favorites/apartments/1001"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
     }
 
     @Test
@@ -358,8 +388,13 @@ class SecurityRulesTest {
         }
 
         @Bean
-        FavoriteService favoriteService() {
-            return new FavoriteService();
+        FavoriteService favoriteService(FavoriteMapper favoriteMapper) {
+            return new FavoriteService(favoriteMapper);
+        }
+
+        @Bean
+        FavoriteMapper favoriteMapper() {
+            return new SecurityFavoriteMapper();
         }
 
         @Bean
@@ -411,6 +446,45 @@ class SecurityRulesTest {
                 usersById.put(userId, updated);
                 usersByEmail.put(updated.email(), updated);
                 return 1;
+            }
+        }
+
+        private static class SecurityFavoriteMapper implements FavoriteMapper {
+
+            @Override
+            public Optional<PropertyType> findPropertyTypeById(Long propertyId) {
+                return Optional.of(PropertyType.APARTMENT);
+            }
+
+            @Override
+            public List<FavoriteApartmentRow> findFavoriteApartments(Long userId) {
+                return List.of();
+            }
+
+            @Override
+            public Optional<FavoriteApartmentRow> findFavoriteApartment(Long userId, Long propertyId) {
+                var row = new FavoriteApartmentRow();
+                row.setFavoriteId(1L);
+                row.setPropertyId(propertyId);
+                row.setPropertyType(PropertyType.APARTMENT);
+                row.setName("보안 테스트 아파트");
+                row.setCreatedAt(OffsetDateTime.parse("2026-06-15T16:00:00+09:00"));
+                return Optional.of(row);
+            }
+
+            @Override
+            public int insertFavoriteApartment(Long userId, Long propertyId) {
+                return 1;
+            }
+
+            @Override
+            public int deleteFavoriteApartment(Long userId, Long propertyId) {
+                return 1;
+            }
+
+            @Override
+            public boolean existsFavoriteApartment(Long userId, Long propertyId) {
+                return false;
             }
         }
 
@@ -497,5 +571,19 @@ class SecurityRulesTest {
                 return 0;
             }
         }
+    }
+
+    private UsernamePasswordAuthenticationToken authPrincipal(Long userId, String role) {
+        var principal = new AuthUserPrincipal(
+                userId,
+                "security-user-" + userId + "@example.com",
+                "보안 사용자",
+                Set.of(role)
+        );
+        return new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+        );
     }
 }

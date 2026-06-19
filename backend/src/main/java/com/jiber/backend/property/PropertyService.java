@@ -1,8 +1,10 @@
 package com.jiber.backend.property;
 
+import com.jiber.backend.auth.AuthUserPrincipal;
 import com.jiber.backend.common.PageMetadata;
 import com.jiber.backend.common.error.ApiException;
 import com.jiber.backend.common.error.ErrorCode;
+import com.jiber.backend.favorite.FavoriteMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -13,15 +15,18 @@ public class PropertyService {
     private static final int DETAIL_TRANSACTION_LIMIT = 20;
 
     private final PropertyMapper propertyMapper;
+    private final FavoriteMapper favoriteMapper;
     private final PropertyAiEligibilityService eligibilityService;
     private final PropertyValuationClient valuationClient;
 
     public PropertyService(
             PropertyMapper propertyMapper,
+            FavoriteMapper favoriteMapper,
             PropertyAiEligibilityService eligibilityService,
             PropertyValuationClient valuationClient
     ) {
         this.propertyMapper = propertyMapper;
+        this.favoriteMapper = favoriteMapper;
         this.eligibilityService = eligibilityService;
         this.valuationClient = valuationClient;
     }
@@ -48,12 +53,19 @@ public class PropertyService {
     }
 
     public PropertyDetailResponse getPropertyDetail(Long propertyId) {
+        return getPropertyDetail(propertyId, null);
+    }
+
+    public PropertyDetailResponse getPropertyDetail(Long propertyId, AuthUserPrincipal principal) {
         var row = propertyMapper.findDetailById(propertyId)
                 .orElseThrow(() -> new ApiException(ErrorCode.PROPERTY_NOT_FOUND));
         var transactions = propertyMapper.findRecentTransactions(propertyId, DETAIL_TRANSACTION_LIMIT).stream()
                 .map(this::toTransaction)
                 .toList();
         var aiAvailable = row.getPropertyType() == PropertyType.APARTMENT;
+        var apartmentFavorited = principal != null
+                && principal.userId() != null
+                && favoriteMapper.existsFavoriteApartment(principal.userId(), propertyId);
         return new PropertyDetailResponse(
                 row.getPropertyId(),
                 row.getPropertyType(),
@@ -62,7 +74,7 @@ public class PropertyService {
                 new PropertyDetailResponse.Location(toDouble(row.getLatitude()), toDouble(row.getLongitude())),
                 new PropertyDetailResponse.Summary(row.getBuiltYear(), row.getHouseholdCount(), row.getLatestDealAmount(), row.getLatestDealDate()),
                 transactions,
-                new PropertyDetailResponse.FavoriteSummary(false, false),
+                new PropertyDetailResponse.FavoriteSummary(apartmentFavorited, false),
                 new PropertyDetailResponse.AiMetadata(
                         aiAvailable,
                         aiAvailable,

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiber.backend.favorite.FavoriteMapper">
+    <sql id="FavoriteApartmentColumns">
+        fa.favorite_id,
+        fa.property_id,
+        p.property_type,
+        p.name,
+        COALESCE(NULLIF(p.road_address, ''), NULLIF(p.jibun_address, ''), CONCAT_WS(' ', p.sido, p.sigungu, p.legal_dong)) AS address,
+        p.latitude,
+        p.longitude,
+        (
+            SELECT t.transaction_type
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            ORDER BY t.deal_date DESC, t.transaction_id DESC
+            LIMIT 1
+        ) AS latest_transaction_type,
+        (
+            SELECT COALESCE(t.deal_amount_krw, t.deposit_amount_krw)
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            ORDER BY t.deal_date DESC, t.transaction_id DESC
+            LIMIT 1
+        ) AS latest_deal_amount,
+        (
+            SELECT t.deal_date
+            FROM property_transactions t
+            WHERE t.property_id = p.property_id
+            ORDER BY t.deal_date DESC, t.transaction_id DESC
+            LIMIT 1
+        ) AS latest_deal_date,
+        fa.created_at
+    </sql>
+
+    <select id="findPropertyTypeById" resultType="com.jiber.backend.property.PropertyType">
+        SELECT property_type
+        FROM properties
+        WHERE property_id = #{propertyId}
+    </select>
+
+    <select id="findFavoriteApartments" resultType="com.jiber.backend.favorite.FavoriteApartmentRow">
+        SELECT
+            <include refid="FavoriteApartmentColumns"/>
+        FROM favorite_apartments fa
+        INNER JOIN properties p ON p.property_id = fa.property_id
+        WHERE fa.user_id = #{userId}
+        ORDER BY fa.created_at DESC, fa.favorite_id DESC
+    </select>
+
+    <select id="findFavoriteApartment" resultType="com.jiber.backend.favorite.FavoriteApartmentRow">
+        SELECT
+            <include refid="FavoriteApartmentColumns"/>
+        FROM favorite_apartments fa
+        INNER JOIN properties p ON p.property_id = fa.property_id
+        WHERE fa.user_id = #{userId}
+          AND fa.property_id = #{propertyId}
+        LIMIT 1
+    </select>
+
+    <insert id="insertFavoriteApartment">
+        INSERT IGNORE INTO favorite_apartments (
+            user_id,
+            property_id
+        ) VALUES (
+            #{userId},
+            #{propertyId}
+        )
+    </insert>
+
+    <delete id="deleteFavoriteApartment">
+        DELETE FROM favorite_apartments
+        WHERE user_id = #{userId}
+          AND property_id = #{propertyId}
+    </delete>
+
+    <select id="existsFavoriteApartment" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM favorite_apartments
+            WHERE user_id = #{userId}
+              AND property_id = #{propertyId}
+        )
+    </select>
+</mapper>

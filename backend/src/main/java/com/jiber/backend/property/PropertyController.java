@@ -1,7 +1,9 @@
 package com.jiber.backend.property;
 
+import com.jiber.backend.auth.AuthUserPrincipal;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,8 +37,11 @@ public class PropertyController {
     }
 
     @GetMapping("/{propertyId}")
-    public PropertyDetailResponse detail(@PathVariable Long propertyId) {
-        return propertyService.getPropertyDetail(propertyId);
+    public PropertyDetailResponse detail(
+            @PathVariable Long propertyId,
+            @AuthenticationPrincipal AuthUserPrincipal principal
+    ) {
+        return propertyService.getPropertyDetail(propertyId, principal);
     }
 
     @PostMapping("/{propertyId}/valuation")

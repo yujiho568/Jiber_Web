@@ -3,13 +3,18 @@ package com.jiber.backend.property;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.jiber.backend.auth.AuthUserPrincipal;
 import com.jiber.backend.common.error.ApiException;
 import com.jiber.backend.common.error.ErrorCode;
+import com.jiber.backend.favorite.FavoriteApartmentRow;
+import com.jiber.backend.favorite.FavoriteMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class PropertyServiceTest {
@@ -135,11 +140,31 @@ class PropertyServiceTest {
         assertThat(response.transactions().get(0).dealAmount()).isEqualTo(1_250_000_000L);
         assertThat(response.transactions().get(1).transactionType()).isEqualTo(TransactionType.JEONSE);
         assertThat(response.transactions().get(1).depositAmount()).isEqualTo(780_000_000L);
+        assertThat(response.favorite().apartmentFavorited()).isFalse();
         assertThat(response.ai().valuationAvailable()).isTrue();
     }
 
+    @Test
+    void propertyDetailReturnsFavoriteFlagForLoggedInUser() {
+        var mapper = new FakePropertyMapper();
+        mapper.detailRow = sampleDetailRow();
+        var favoriteMapper = new FakeFavoriteMapper();
+        favoriteMapper.favorite(7L, 1001L);
+        var service = service(mapper, favoriteMapper, new RecordingValuationClient());
+        var principal = new AuthUserPrincipal(7L, "user@example.com", "사용자", Set.of("USER"));
+
+        var response = service.getPropertyDetail(1001L, principal);
+
+        assertThat(response.favorite().apartmentFavorited()).isTrue();
+        assertThat(response.favorite().areaFavorited()).isFalse();
+    }
+
     private PropertyService service(PropertyMapper mapper, PropertyValuationClient valuationClient) {
-        return new PropertyService(mapper, new PropertyAiEligibilityService(), valuationClient);
+        return service(mapper, new FakeFavoriteMapper(), valuationClient);
+    }
+
+    private PropertyService service(PropertyMapper mapper, FavoriteMapper favoriteMapper, PropertyValuationClient valuationClient) {
+        return new PropertyService(mapper, favoriteMapper, new PropertyAiEligibilityService(), valuationClient);
     }
 
     private ValuationRequest valuationRequest() {
@@ -246,6 +271,49 @@ class PropertyServiceTest {
         @Override
         public Optional<PropertyType> findPropertyTypeById(Long propertyId) {
             return Optional.ofNullable(propertyType);
+        }
+    }
+
+    private static class FakeFavoriteMapper implements FavoriteMapper {
+
+        private final Set<String> favorites = new HashSet<>();
+
+        void favorite(Long userId, Long propertyId) {
+            favorites.add(key(userId, propertyId));
+        }
+
+        @Override
+        public Optional<PropertyType> findPropertyTypeById(Long propertyId) {
+            return Optional.of(PropertyType.APARTMENT);
+        }
+
+        @Override
+        public List<FavoriteApartmentRow> findFavoriteApartments(Long userId) {
+            return List.of();
+        }
+
+        @Override
+        public Optional<FavoriteApartmentRow> findFavoriteApartment(Long userId, Long propertyId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public int insertFavoriteApartment(Long userId, Long propertyId) {
+            return 0;
+        }
+
+        @Override
+        public int deleteFavoriteApartment(Long userId, Long propertyId) {
+            return 0;
+        }
+
+        @Override
+        public boolean existsFavoriteApartment(Long userId, Long propertyId) {
+            return favorites.contains(key(userId, propertyId));
+        }
+
+        private String key(Long userId, Long propertyId) {
+            return userId + ":" + propertyId;
         }
     }
 

@@ -38,6 +38,9 @@ onMounted(fetchFavorites)
     <p class="eyebrow">즐겨찾기</p>
     <h1>저장한 아파트와 관심 지역을 한곳에서 확인하세요.</h1>
     <p>즐겨찾기는 개인 기록용 기능이며 특정 거래 판단을 대신하지 않습니다.</p>
+    <div class="button-row">
+      <RouterLink class="secondary-button" to="/chat">챗봇에 질문하기</RouterLink>
+    </div>
   </section>
 
   <p v-if="loading" class="loading-text">즐겨찾기를 불러오고 있습니다.</p>

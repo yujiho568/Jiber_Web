@@ -248,6 +248,29 @@ export interface ShapResponse {
   message: string
 }
 
+export interface ChatRequest {
+  question: string
+  runtimeContext?: Record<string, unknown>
+}
+
+export interface ChatContext {
+  source: string
+  text: string
+}
+
+export interface ChatResponse {
+  answer: string
+  contexts: ChatContext[]
+  model: string
+  ragConfig: {
+    embedding: string
+    chunkSize: number
+    overlap: number
+    hybrid: boolean
+    rerank: boolean
+  }
+}
+
 export interface FavoriteApartmentItem {
   favoriteId: number
   propertyId: number

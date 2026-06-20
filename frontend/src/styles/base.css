@@ -514,6 +514,80 @@ input[type="range"] {
   font-weight: 900;
 }
 
+.chat-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.chat-panel,
+.chat-form {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 20px;
+}
+
+.chat-panel {
+  display: grid;
+  gap: 12px;
+  min-height: 360px;
+  align-content: start;
+}
+
+.chat-message {
+  max-width: min(760px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #ffffff;
+}
+
+.chat-message p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.chat-message.is-user {
+  justify-self: end;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.chat-message.is-assistant {
+  justify-self: start;
+}
+
+.chat-contexts {
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.chat-contexts ol {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+
+.chat-contexts li {
+  display: grid;
+  gap: 4px;
+}
+
+.chat-form {
+  display: grid;
+  gap: 10px;
+}
+
+.chat-form textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
 .chart-box {
   width: 100%;
   height: 280px;

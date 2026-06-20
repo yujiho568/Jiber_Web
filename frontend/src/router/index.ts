@@ -31,6 +31,12 @@ export const router = createRouter({
       meta: { requiresAuth: true, roles: ['USER', 'ADMIN'] }
     },
     {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('@/views/ChatView.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
       path: '/notices',
       name: 'notices',
       component: () => import('@/views/NoticesView.vue'),

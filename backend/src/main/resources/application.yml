@@ -67,7 +67,7 @@ jiber:
     base-url: ${MODEL_SERVER_BASE_URL:http://localhost:8000}
     internal-token: ${MODEL_SERVER_INTERNAL_TOKEN:}
     connect-timeout-ms: ${MODEL_SERVER_CONNECT_TIMEOUT_MS:2000}
-    read-timeout-ms: ${MODEL_SERVER_READ_TIMEOUT_MS:5000}
+    read-timeout-ms: ${MODEL_SERVER_READ_TIMEOUT_MS:120000}
     model-version: ${MODEL_VERSION:hedonic-v1}
     baseline-date: ${MODEL_BASELINE_DATE:2026-06-12}
     feature-set-version: ${MODEL_FEATURE_SET_VERSION:apartment-basic-v1}

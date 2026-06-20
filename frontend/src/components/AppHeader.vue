@@ -24,6 +24,7 @@ async function logout() {
 
     <nav class="main-nav" aria-label="주요 메뉴">
       <RouterLink to="/map">지도 검색</RouterLink>
+      <RouterLink to="/chat">챗봇</RouterLink>
       <RouterLink to="/favorites">즐겨찾기</RouterLink>
       <RouterLink to="/notices">공지사항</RouterLink>
       <RouterLink to="/admin">관리자</RouterLink>

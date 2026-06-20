@@ -19,6 +19,7 @@ public enum ErrorCode {
     VALUATION_UNSUPPORTED_PROPERTY_TYPE(HttpStatus.UNPROCESSABLE_ENTITY, "아파트 단지에 한해 제공되는 기능입니다."),
     VALUATION_INSUFFICIENT_DATA(HttpStatus.UNPROCESSABLE_ENTITY, "가격 추정에 필요한 데이터가 부족합니다."),
     MODEL_SERVER_UNAVAILABLE(HttpStatus.BAD_GATEWAY, "가격 추정 서버와 연결할 수 없습니다."),
+    CHATBOT_UNAVAILABLE(HttpStatus.BAD_GATEWAY, "부동산 챗봇 서버와 연결할 수 없습니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 
     private final HttpStatus status;

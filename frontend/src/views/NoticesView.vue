@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import { noticesApi } from '@/api/notices'
 import type { NoticeSummary } from '@/api/types'
@@ -38,6 +39,9 @@ onMounted(fetchNotices)
   <section class="page-heading">
     <p class="eyebrow">공지사항</p>
     <h1>서비스 운영 안내를 확인하세요.</h1>
+    <div class="button-row">
+      <RouterLink class="secondary-button" to="/chat">챗봇에 질문하기</RouterLink>
+    </div>
   </section>
 
   <form class="search-row" @submit.prevent="fetchNotices">

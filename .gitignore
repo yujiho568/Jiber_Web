@@ -52,6 +52,7 @@ venv/
 # Model and local data artifacts
 artifacts/
 model-artifacts/
+rag_chroma_db/
 *.pkl
 *.joblib
 *.parquet

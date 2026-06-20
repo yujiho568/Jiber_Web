@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import { noticesApi } from '@/api/notices'
 import { useAuthStore } from '@/stores/auth'
@@ -39,6 +40,9 @@ async function createNotice() {
   <section class="page-heading">
     <p class="eyebrow">관리자</p>
     <h1>공지사항을 등록하고 운영 상태를 확인합니다.</h1>
+    <div class="button-row">
+      <RouterLink class="secondary-button" to="/chat">챗봇에 질문하기</RouterLink>
+    </div>
     <p v-if="!authStore.isAdmin" class="inline-error">관리자 권한이 필요합니다.</p>
   </section>
 

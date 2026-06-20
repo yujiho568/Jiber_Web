@@ -3,7 +3,7 @@ import * as echarts from 'echarts/core'
 import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import type { ShapValue } from '@/api/types'
 import EmptyState from '@/components/EmptyState.vue'
@@ -20,7 +20,9 @@ let chart: echarts.ECharts | null = null
 
 const hasData = computed(() => props.values.length > 0)
 
-function renderChart() {
+async function renderChart() {
+  await nextTick()
+
   if (!chartEl.value || !hasData.value) {
     return
   }
@@ -53,7 +55,7 @@ function renderChart() {
 }
 
 onMounted(renderChart)
-watch(() => props.values, renderChart, { deep: true })
+watch(() => props.values, renderChart, { deep: true, flush: 'post' })
 
 onBeforeUnmount(() => {
   chart?.dispose()

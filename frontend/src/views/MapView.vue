@@ -200,6 +200,9 @@ onBeforeUnmount(() => {
   <section class="page-heading">
     <p class="eyebrow">지도 검색</p>
     <h1>지역과 거래 조건을 선택해 실거래 위치를 확인하세요.</h1>
+    <div class="button-row">
+      <RouterLink class="secondary-button" to="/chat">챗봇에 질문하기</RouterLink>
+    </div>
   </section>
 
   <section class="map-layout">

@@ -2,7 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { favoritesApi } from '@/api/favorites'
 import { propertyApi } from '@/api/property'
+import { getApiError } from '@/api/client'
 import type { PropertyDetail, ShapValue, ValuationResponse } from '@/api/types'
 import ShapChart from '@/charts/ShapChart.vue'
 import TransactionChart from '@/charts/TransactionChart.vue'
@@ -17,6 +19,9 @@ const property = ref<PropertyDetail | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const aiMessage = ref('')
+const favoriteMessage = ref('')
+const favoriteErrorMessage = ref('')
+const favoriteUpdating = ref(false)
 const valuation = ref<ValuationResponse | null>(null)
 const shapValues = ref<ShapValue[]>([])
 
@@ -33,6 +38,7 @@ const latestTransaction = computed(() => {
   )
 })
 const recentTransactionCount = computed(() => property.value?.transactions.length ?? 0)
+const isApartmentFavorite = computed(() => Boolean(property.value?.favorite?.apartmentFavorited))
 const canRequestAi = computed(() => {
   return Boolean(
     authStore.isAuthenticated &&
@@ -41,6 +47,45 @@ const canRequestAi = computed(() => {
       property.value.ai.shapAvailable
   )
 })
+
+function setApartmentFavorite(nextValue: boolean) {
+  if (!property.value) {
+    return
+  }
+
+  property.value.favorite = {
+    apartmentFavorited: nextValue,
+    areaFavorited: property.value.favorite?.areaFavorited ?? false
+  }
+}
+
+function setFavoriteFailure(error: unknown, fallbackMessage: string) {
+  const apiError = getApiError(error)
+
+  if (apiError?.code === 'FAVORITE_ALREADY_EXISTS') {
+    setApartmentFavorite(true)
+    favoriteMessage.value = '이미 관심 아파트에 저장되어 있습니다.'
+    return
+  }
+
+  if (apiError?.code === 'FAVORITE_NOT_FOUND') {
+    setApartmentFavorite(false)
+    favoriteMessage.value = '이미 삭제된 관심 아파트입니다.'
+    return
+  }
+
+  if (apiError?.code === 'PROPERTY_NOT_FOUND') {
+    favoriteErrorMessage.value = '부동산 정보를 찾을 수 없습니다.'
+    return
+  }
+
+  if (apiError?.code === 'AUTH_REQUIRED') {
+    favoriteErrorMessage.value = '로그인이 필요한 기능입니다.'
+    return
+  }
+
+  favoriteErrorMessage.value = fallbackMessage
+}
 
 async function fetchProperty() {
   loading.value = true
@@ -82,6 +127,44 @@ async function requestAiExplanation() {
     aiMessage.value = valuation.value.message || shap.message
   } catch {
     aiMessage.value = '추정가와 SHAP 요인을 아직 불러오지 못했습니다. 로그인 상태와 백엔드 API를 확인해 주세요.'
+  }
+}
+
+async function toggleApartmentFavorite() {
+  favoriteMessage.value = ''
+  favoriteErrorMessage.value = ''
+
+  if (!property.value) {
+    return
+  }
+
+  if (!authStore.isAuthenticated) {
+    favoriteMessage.value = '로그인 후 관심 아파트를 저장할 수 있습니다.'
+    return
+  }
+
+  if (property.value.propertyType !== 'APARTMENT') {
+    favoriteMessage.value = '아파트 단지만 관심 아파트로 저장할 수 있습니다.'
+    return
+  }
+
+  favoriteUpdating.value = true
+
+  try {
+    if (isApartmentFavorite.value) {
+      await favoritesApi.removeApartment(property.value.propertyId)
+      setApartmentFavorite(false)
+      favoriteMessage.value = '관심 아파트에서 삭제했습니다.'
+      return
+    }
+
+    await favoritesApi.addApartment(property.value.propertyId)
+    setApartmentFavorite(true)
+    favoriteMessage.value = '관심 아파트에 추가했습니다.'
+  } catch (error) {
+    setFavoriteFailure(error, '관심 아파트 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+  } finally {
+    favoriteUpdating.value = false
   }
 }
 
@@ -130,6 +213,27 @@ onMounted(fetchProperty)
           <dd>최근 거래 {{ recentTransactionCount.toLocaleString('ko-KR') }}건</dd>
         </div>
       </dl>
+      <div class="favorite-actions">
+        <button
+          class="secondary-button"
+          data-test="apartment-favorite-button"
+          type="button"
+          :disabled="favoriteUpdating"
+          @click="toggleApartmentFavorite"
+        >
+          {{
+            favoriteUpdating
+              ? '처리 중입니다'
+              : isApartmentFavorite
+                ? '관심 아파트 삭제'
+                : authStore.isAuthenticated
+                  ? '관심 아파트 추가'
+                  : '로그인 후 즐겨찾기'
+          }}
+        </button>
+        <p v-if="favoriteMessage" class="helper-text">{{ favoriteMessage }}</p>
+        <p v-if="favoriteErrorMessage" class="inline-error">{{ favoriteErrorMessage }}</p>
+      </div>
     </article>
 
     <article class="info-panel">

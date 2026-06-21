@@ -144,6 +144,16 @@ describe('canAccessRoute', () => {
     expect(router.currentRoute.value.query.redirect).toBe('/favorites?case=protected-refresh-failure')
   })
 
+  it('allows authenticated users to visit favorites after refresh restore', async () => {
+    const refreshSpy = vi.spyOn(authApi, 'refresh').mockResolvedValueOnce(sessionResponse)
+
+    const store = await visit('/favorites?case=protected-refresh-success')
+
+    expect(refreshSpy).toHaveBeenCalledTimes(1)
+    expect(store.isAuthenticated).toBe(true)
+    expect(router.currentRoute.value.name).toBe('favorites')
+  })
+
   it('does not bootstrap refresh on login callback route', async () => {
     const refreshSpy = vi.spyOn(authApi, 'refresh').mockResolvedValueOnce(sessionResponse)
 

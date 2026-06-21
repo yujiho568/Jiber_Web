@@ -4,8 +4,19 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { PagedResponse, PropertyDetail, PropertyMapItem, PropertySearchItem } from '@/api/types'
+import { useAuthStore } from '@/stores/auth'
 import MapView from '@/views/MapView.vue'
 import PropertyDetailView from '@/views/PropertyDetailView.vue'
+
+const userSession = {
+  accessToken: 'memory-only-detail-token',
+  user: {
+    userId: 7,
+    email: 'detail@example.com',
+    displayName: '상세 사용자',
+    roles: ['USER' as const]
+  }
+}
 
 const propertyApiMock = vi.hoisted(() => ({
   getMapProperties: vi.fn(),
@@ -13,6 +24,11 @@ const propertyApiMock = vi.hoisted(() => ({
   getProperty: vi.fn(),
   requestValuation: vi.fn(),
   requestShap: vi.fn()
+}))
+
+const favoritesApiMock = vi.hoisted(() => ({
+  addApartment: vi.fn(),
+  removeApartment: vi.fn()
 }))
 
 const kakaoLoaderMock = vi.hoisted(() => ({
@@ -28,6 +44,10 @@ const kakaoLoaderMock = vi.hoisted(() => ({
 
 vi.mock('@/api/property', () => ({
   propertyApi: propertyApiMock
+}))
+
+vi.mock('@/api/favorites', () => ({
+  favoritesApi: favoritesApiMock
 }))
 
 vi.mock('@/map/kakaoLoader', () => ({
@@ -163,13 +183,42 @@ async function mountMapView() {
   return { wrapper, router }
 }
 
-async function mountPropertyDetailView() {
+function detailWithFavorite(apartmentFavorited: boolean): PropertyDetail {
+  return {
+    ...importedDetail,
+    favorite: {
+      apartmentFavorited,
+      areaFavorited: false
+    }
+  }
+}
+
+function createApiError(code: string) {
+  return {
+    isAxiosError: true,
+    response: {
+      data: {
+        code,
+        message: '요청을 처리하지 못했습니다.',
+        path: '/api/v1/favorites/apartments',
+        timestamp: '2026-06-19T10:00:00+09:00'
+      }
+    }
+  }
+}
+
+async function mountPropertyDetailView(options: { authenticated?: boolean; detail?: PropertyDetail } = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
+  propertyApiMock.getProperty.mockResolvedValueOnce(options.detail ?? importedDetail)
 
   const router = createTestRouter('/properties/1912')
   await router.push('/properties/1912')
   await router.isReady()
+
+  if (options.authenticated) {
+    useAuthStore().setSession(userSession)
+  }
 
   const wrapper = mount(PropertyDetailView, {
     global: {
@@ -192,6 +241,16 @@ beforeEach(() => {
   propertyApiMock.getProperty.mockReset().mockResolvedValue(importedDetail)
   propertyApiMock.requestValuation.mockReset()
   propertyApiMock.requestShap.mockReset()
+  favoritesApiMock.addApartment.mockReset().mockResolvedValue({
+    favoriteId: 1,
+    propertyId: 1912,
+    createdAt: '2026-06-19T10:00:00+09:00',
+    message: '저장했습니다.'
+  })
+  favoritesApiMock.removeApartment.mockReset().mockResolvedValue({
+    propertyId: 1912,
+    message: '삭제했습니다.'
+  })
 })
 
 describe('MapView keyword search', () => {
@@ -282,5 +341,67 @@ describe('PropertyDetailView transaction summary', () => {
     expect(wrapper.text()).toContain('최근 거래유형')
     expect(wrapper.text()).toContain('전세')
     expect(wrapper.text()).toContain('최근 거래 1건')
+  })
+
+  it('reflects initial apartment favorite states', async () => {
+    const unfavorited = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(false) })
+    expect(unfavorited.text()).toContain('관심 아파트 추가')
+
+    const favorited = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(true) })
+    expect(favorited.text()).toContain('관심 아파트 삭제')
+  })
+
+  it('adds an apartment favorite and updates the button state', async () => {
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(false) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addApartment).toHaveBeenCalledWith(1912)
+    expect(wrapper.text()).toContain('관심 아파트에 추가했습니다.')
+    expect(wrapper.text()).toContain('관심 아파트 삭제')
+  })
+
+  it('removes an apartment favorite and updates the button state', async () => {
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(true) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.removeApartment).toHaveBeenCalledWith(1912)
+    expect(wrapper.text()).toContain('관심 아파트에서 삭제했습니다.')
+    expect(wrapper.text()).toContain('관심 아파트 추가')
+  })
+
+  it('guides anonymous users to log in before saving favorites', async () => {
+    const wrapper = await mountPropertyDetailView({ detail: detailWithFavorite(false) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addApartment).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('로그인 후 관심 아파트를 저장할 수 있습니다.')
+  })
+
+  it('handles duplicate favorite creation safely', async () => {
+    favoritesApiMock.addApartment.mockRejectedValueOnce(createApiError('FAVORITE_ALREADY_EXISTS'))
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(false) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('이미 관심 아파트에 저장되어 있습니다.')
+    expect(wrapper.text()).toContain('관심 아파트 삭제')
+  })
+
+  it('handles missing favorite deletion safely', async () => {
+    favoritesApiMock.removeApartment.mockRejectedValueOnce(createApiError('FAVORITE_NOT_FOUND'))
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(true) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('이미 삭제된 관심 아파트입니다.')
+    expect(wrapper.text()).toContain('관심 아파트 추가')
   })
 })

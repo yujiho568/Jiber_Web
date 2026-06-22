@@ -18,6 +18,31 @@ from app.schemas.chat import ChatContext, RagConfig, RealEstateChatResponse
 
 BM25_WEIGHT = 0.5
 SKIP_EXTENSIONS = {".html", ".xlsx", ".xls", ".csv", ".json", ".ds_store"}
+LOADER_VERSION = "source-summary-v1"
+
+SOURCE_SUMMARIES = {
+    "real_estate_sources/r_one_2026_05_housing_price_trend_report.pdf": (
+        "문서 제목: 2026년 5월 전국주택가격동향조사 보고서.\n"
+        "문서 성격: 한국부동산원 R-ONE의 월간 주택 가격 동향 리포트.\n"
+        "조사대상기간: 2026년 5월 1일 ~ 2026년 5월 31일. 공표일: 2026년 6월 15일.\n"
+        "조사결과 요약: 2026년 5월 전국 주택가격은 지난달 대비 상승했다.\n"
+        "전월대비 변동률은 전국 기준 매매가격지수 0.21%, 전세가격지수 0.35%, 월세통합가격지수 0.35%이다.\n"
+        "수도권은 매매 0.46%, 전세 0.61%, 월세통합 0.56%로 전국보다 상승폭이 컸다.\n"
+        "지방은 매매 -0.02%, 전세 0.10%, 월세통합 0.16%로 매매는 소폭 하락했고 임대차 지표는 상승했다.\n"
+        "서울은 매매 0.90%, 전세 0.91%, 월세통합 0.81%로 상승폭이 컸다.\n"
+        "보고서 설명에 따르면 서울은 정주여건 양호 단지, 대단지, 역세권 중심으로 매수·임차 문의가 증가하며 상승했다."
+    ),
+    "real_estate_sources/r_one_2026_04_apartment_actual_transaction_price_index_report.pdf": (
+        "문서 제목: 2026년 4월 공동주택 실거래가격지수 보고서.\n"
+        "문서 성격: 한국부동산원 R-ONE의 공동주택 실거래가격지수 리포트.\n"
+        "아파트, 연립·다세대 등 공동주택 실거래가격지수와 지역별·규모별 가격지수 변동을 설명한다."
+    ),
+    "real_estate_sources/r_one_2026_05_officetel_price_trend_report.pdf": (
+        "문서 제목: 2026년 5월 오피스텔가격동향조사 보고서.\n"
+        "문서 성격: 한국부동산원 R-ONE의 월간 오피스텔 매매·전세·월세 가격 동향 리포트.\n"
+        "오피스텔 가격 동향과 아파트 가격 동향 비교 정보를 포함한다."
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -96,9 +121,24 @@ class RealEstateRagChatService:
         )
         prompt = (
             "너는 부동산 문서 기반 RAG 챗봇이다. "
-            "아래 문서와 런타임 컨텍스트에 근거해서만 답한다. "
-            "근거가 없거나 부동산/가격예측/XAI와 무관한 질문이면 "
-            "'문서에서 찾을 수 없습니다'라고 답한다. "
+            "질문이 주택, 부동산 거래, 임대차, 계약, 권리관계, 가격, 시세, 통계, 실거래, "
+            "입지, 건물, 주거 제도, 부동산 서비스, 가격예측, SHAP, XAI 중 하나라도 "
+            "합리적으로 연결되면 부동산 관련 질문으로 간주하고 답한다. "
+            "개념 설명, 용어 비교, 절차 안내처럼 검색 문서에 직접 문장이 없더라도 "
+            "부동산 도메인에 속하면 일반적인 부동산 지식에 기반해 참고용으로 답한다. "
+            "일반적인 부동산 문서 질문은 검색 문서를 주요 근거로 답하고, "
+            "런타임 컨텍스트가 '없음'이라는 이유만으로 정보가 없다고 말하지 않는다. "
+            "현재 매물의 가격예측, 추정가, SHAP, XAI, 영향 요인에 관한 질문은 "
+            "런타임 컨텍스트를 주요 근거로 삼아 답한다. "
+            "런타임 컨텍스트에 property, valuation, shap 값이 있으면 해당 값들을 직접 해석하고, "
+            "검색 문서는 일반적인 부동산 배경 근거로만 보조 사용한다. "
+            "검색 문서에 질문과 관련된 수치나 설명이 있으면 먼저 그 내용을 요약한다. "
+            "표 일부만 검색되어 단위나 항목명이 불명확한 숫자는 임의로 달러, 원, 만원 등으로 변환하지 말고 "
+            "문서에 명확히 보이는 단위와 항목만 사용한다. "
+            "검색 문서와 런타임 컨텍스트 어디에도 직접 근거가 없으면, "
+            "그 사실을 짧게 밝힌 뒤 일반적인 부동산 지식에 기반한 참고용 답변을 제공한다. "
+            "음식, 게임, 연예, 코딩, 일반 잡담처럼 부동산과 명백히 무관한 질문에만 "
+            "부동산 관련 질문만 답할 수 있다고 말한다. "
             "투자 조언, 매수/매도 추천, 수익 보장은 하지 않는다.\n\n"
             f"[런타임 컨텍스트]\n{runtime_text}\n\n"
             f"[검색 문서]\n{context_text}\n\n"
@@ -179,6 +219,9 @@ class RealEstateRagChatService:
                 reader = PdfReader(str(path))
                 text = "\n".join(page.extract_text() or "" for page in reader.pages).strip()
                 if text:
+                    summary = SOURCE_SUMMARIES.get(relative_path)
+                    if summary:
+                        documents.append((f"{relative_path}#summary", summary))
                     documents.append((relative_path, text))
         return documents
 
@@ -229,6 +272,7 @@ class RealEstateRagChatService:
                     "chunkSize": settings.rag_chunk_size,
                     "overlap": settings.rag_chunk_overlap,
                     "docsDir": str(self.docs_dir),
+                    "loaderVersion": LOADER_VERSION,
                 },
                 ensure_ascii=False,
                 sort_keys=True,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { propertyApi } from '@/api/property'
 import type { PropertyDetail, ShapValue, ValuationResponse } from '@/api/types'
@@ -8,10 +8,13 @@ import ShapChart from '@/charts/ShapChart.vue'
 import TransactionChart from '@/charts/TransactionChart.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useChatContextStore } from '@/stores/chatContext'
 import { formatDate, formatKrw, propertyTypeLabel, transactionTypeLabel } from '@/utils/format'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
+const chatContextStore = useChatContextStore()
 
 const property = ref<PropertyDetail | null>(null)
 const loading = ref(false)
@@ -41,6 +44,7 @@ const canRequestAi = computed(() => {
       property.value.ai.shapAvailable
   )
 })
+const canAskChatAboutAnalysis = computed(() => Boolean(property.value && valuation.value && shapValues.value.length))
 
 async function fetchProperty() {
   loading.value = true
@@ -70,6 +74,12 @@ async function requestAiExplanation() {
     return
   }
 
+  const currentProperty = property.value
+  if (!currentProperty) {
+    aiMessage.value = '부동산 상세 정보를 먼저 불러와야 합니다.'
+    return
+  }
+
   try {
     const payload = {
       exclusiveAreaM2: 84.95,
@@ -80,9 +90,22 @@ async function requestAiExplanation() {
     const shap = await propertyApi.requestShap(propertyId.value, payload)
     shapValues.value = shap.values
     aiMessage.value = valuation.value.message || shap.message
+    chatContextStore.setPropertyAnalysisContext(currentProperty, valuation.value, shapValues.value)
   } catch {
     aiMessage.value = '추정가와 SHAP 요인을 아직 불러오지 못했습니다. 로그인 상태와 백엔드 API를 확인해 주세요.'
   }
+}
+
+async function askChatAboutAnalysis() {
+  if (property.value && valuation.value) {
+    chatContextStore.setPropertyAnalysisContext(property.value, valuation.value, shapValues.value)
+  }
+  await router.push({
+    name: 'chat',
+    query: {
+      q: `${property.value?.name ?? '이 매물'}의 가격 예측이 왜 이렇게 나왔는지 설명해줘`
+    }
+  })
 }
 
 onMounted(fetchProperty)
@@ -142,6 +165,14 @@ onMounted(fetchProperty)
       <p v-if="valuation?.estimatedPrice" class="estimate-text">
         추정가 {{ formatKrw(valuation.estimatedPrice) }}
       </p>
+      <button
+        v-if="canAskChatAboutAnalysis"
+        class="secondary-button"
+        type="button"
+        @click="askChatAboutAnalysis"
+      >
+        챗봇으로 요인 설명 보기
+      </button>
     </article>
   </section>
 

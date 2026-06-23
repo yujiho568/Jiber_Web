@@ -72,3 +72,6 @@ vector_index/
 # Local database files
 mysql-data/
 *.sql.gz
+
+# Local git worktrees
+.worktrees/

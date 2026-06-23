@@ -84,4 +84,73 @@
               AND property_id = #{propertyId}
         )
     </select>
+
+    <sql id="FavoriteAreaColumns">
+        favorite_area_id,
+        label,
+        sido,
+        sigungu,
+        legal_dong,
+        center_lat,
+        center_lng,
+        zoom_level,
+        normalized_key,
+        created_at
+    </sql>
+
+    <select id="findFavoriteAreas" resultType="com.jiber.backend.favorite.FavoriteAreaRow">
+        SELECT
+            <include refid="FavoriteAreaColumns"/>
+        FROM favorite_areas
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC, favorite_area_id DESC
+    </select>
+
+    <select id="findFavoriteAreaByNormalizedKey" resultType="com.jiber.backend.favorite.FavoriteAreaRow">
+        SELECT
+            <include refid="FavoriteAreaColumns"/>
+        FROM favorite_areas
+        WHERE user_id = #{userId}
+          AND normalized_key = #{normalizedKey}
+        LIMIT 1
+    </select>
+
+    <insert id="insertFavoriteArea">
+        INSERT IGNORE INTO favorite_areas (
+            user_id,
+            label,
+            sido,
+            sigungu,
+            legal_dong,
+            center_lat,
+            center_lng,
+            zoom_level,
+            normalized_key
+        ) VALUES (
+            #{command.userId},
+            #{command.label},
+            #{command.sido},
+            #{command.sigungu},
+            #{command.legalDong},
+            #{command.centerLat},
+            #{command.centerLng},
+            #{command.zoomLevel},
+            #{command.normalizedKey}
+        )
+    </insert>
+
+    <delete id="deleteFavoriteArea">
+        DELETE FROM favorite_areas
+        WHERE user_id = #{userId}
+          AND favorite_area_id = #{favoriteAreaId}
+    </delete>
+
+    <select id="existsFavoriteAreaByNormalizedKey" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM favorite_areas
+            WHERE user_id = #{userId}
+              AND normalized_key = #{normalizedKey}
+        )
+    </select>
 </mapper>

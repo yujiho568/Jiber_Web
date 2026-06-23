@@ -4,8 +4,19 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { PagedResponse, PropertyDetail, PropertyMapItem, PropertySearchItem } from '@/api/types'
+import { useAuthStore } from '@/stores/auth'
 import MapView from '@/views/MapView.vue'
 import PropertyDetailView from '@/views/PropertyDetailView.vue'
+
+const userSession = {
+  accessToken: 'memory-only-detail-token',
+  user: {
+    userId: 7,
+    email: 'detail@example.com',
+    displayName: '상세 사용자',
+    roles: ['USER' as const]
+  }
+}
 
 const propertyApiMock = vi.hoisted(() => ({
   getMapProperties: vi.fn(),
@@ -13,6 +24,12 @@ const propertyApiMock = vi.hoisted(() => ({
   getProperty: vi.fn(),
   requestValuation: vi.fn(),
   requestShap: vi.fn()
+}))
+
+const favoritesApiMock = vi.hoisted(() => ({
+  addApartment: vi.fn(),
+  removeApartment: vi.fn(),
+  addArea: vi.fn()
 }))
 
 const kakaoLoaderMock = vi.hoisted(() => ({
@@ -28,6 +45,10 @@ const kakaoLoaderMock = vi.hoisted(() => ({
 
 vi.mock('@/api/property', () => ({
   propertyApi: propertyApiMock
+}))
+
+vi.mock('@/api/favorites', () => ({
+  favoritesApi: favoritesApiMock
 }))
 
 vi.mock('@/map/kakaoLoader', () => ({
@@ -143,19 +164,26 @@ function createTestRouter(initialPath = '/map') {
     routes: [
       { path: '/', component: { template: '<main />' } },
       { path: '/map', component: MapView },
+      { path: '/chat', component: { template: '<main />' } },
       { path: '/properties/:propertyId', component: PropertyDetailView }
     ]
   })
 }
 
-async function mountMapView() {
+async function mountMapView(options: { authenticated?: boolean; path?: string } = {}) {
+  const pinia = createPinia()
+  setActivePinia(pinia)
   const router = createTestRouter('/map')
-  await router.push('/map')
+  await router.push(options.path ?? '/map')
   await router.isReady()
+
+  if (options.authenticated) {
+    useAuthStore().setSession(userSession)
+  }
 
   const wrapper = mount(MapView, {
     global: {
-      plugins: [router]
+      plugins: [pinia, router]
     }
   })
   await flushPromises()
@@ -163,13 +191,42 @@ async function mountMapView() {
   return { wrapper, router }
 }
 
-async function mountPropertyDetailView() {
+function detailWithFavorite(apartmentFavorited: boolean): PropertyDetail {
+  return {
+    ...importedDetail,
+    favorite: {
+      apartmentFavorited,
+      areaFavorited: false
+    }
+  }
+}
+
+function createApiError(code: string) {
+  return {
+    isAxiosError: true,
+    response: {
+      data: {
+        code,
+        message: '요청을 처리하지 못했습니다.',
+        path: '/api/v1/favorites/apartments',
+        timestamp: '2026-06-19T10:00:00+09:00'
+      }
+    }
+  }
+}
+
+async function mountPropertyDetailView(options: { authenticated?: boolean; detail?: PropertyDetail } = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
+  propertyApiMock.getProperty.mockResolvedValueOnce(options.detail ?? importedDetail)
 
   const router = createTestRouter('/properties/1912')
   await router.push('/properties/1912')
   await router.isReady()
+
+  if (options.authenticated) {
+    useAuthStore().setSession(userSession)
+  }
 
   const wrapper = mount(PropertyDetailView, {
     global: {
@@ -192,6 +249,22 @@ beforeEach(() => {
   propertyApiMock.getProperty.mockReset().mockResolvedValue(importedDetail)
   propertyApiMock.requestValuation.mockReset()
   propertyApiMock.requestShap.mockReset()
+  favoritesApiMock.addApartment.mockReset().mockResolvedValue({
+    favoriteId: 1,
+    propertyId: 1912,
+    createdAt: '2026-06-19T10:00:00+09:00',
+    message: '저장했습니다.'
+  })
+  favoritesApiMock.removeApartment.mockReset().mockResolvedValue({
+    propertyId: 1912,
+    message: '삭제했습니다.'
+  })
+  favoritesApiMock.addArea.mockReset().mockResolvedValue({
+    favoriteAreaId: 801,
+    label: '현재 지도 영역',
+    createdAt: '2026-06-19T10:00:00+09:00',
+    message: '저장했습니다.'
+  })
 })
 
 describe('MapView keyword search', () => {
@@ -271,6 +344,88 @@ describe('MapView keyword search', () => {
     expect(wrapper.text()).toContain('샘플 역삼아파트')
     expect(wrapper.text()).not.toContain('"종로구" 검색 결과')
   })
+
+  it('adds the current map area as a favorite for authenticated users', async () => {
+    const { wrapper } = await mountMapView({ authenticated: true })
+
+    await wrapper.get('[data-test="area-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addArea).toHaveBeenCalledWith(
+      expect.objectContaining({
+        label: '현재 지도 영역',
+        centerLat: 37.5,
+        centerLng: 127.035,
+        zoomLevel: 5
+      })
+    )
+    expect(wrapper.text()).toContain('관심 지역에 추가했습니다.')
+  })
+
+  it('does not call the area favorite API for anonymous users', async () => {
+    const { wrapper } = await mountMapView()
+
+    await wrapper.get('[data-test="area-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addArea).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('로그인 후 관심 지역을 저장할 수 있습니다.')
+  })
+
+  it('handles duplicate and validation area favorite errors in Korean', async () => {
+    favoritesApiMock.addArea.mockRejectedValueOnce(createApiError('FAVORITE_AREA_ALREADY_EXISTS'))
+    const duplicateWrapper = await mountMapView({ authenticated: true })
+
+    await duplicateWrapper.wrapper.get('[data-test="area-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(duplicateWrapper.wrapper.text()).toContain('이미 관심 지역에 저장되어 있습니다.')
+
+    favoritesApiMock.addArea.mockRejectedValueOnce(createApiError('VALIDATION_FAILED'))
+    const validationWrapper = await mountMapView({ authenticated: true })
+
+    await validationWrapper.wrapper.get('[data-test="area-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(validationWrapper.wrapper.text()).toContain('관심 지역 정보를 저장할 수 없습니다.')
+  })
+
+  it('uses the active keyword as the area favorite label and selected result as center', async () => {
+    propertyApiMock.searchProperties.mockResolvedValueOnce(searchResponse([importedSearchItem]))
+    const { wrapper } = await mountMapView({ authenticated: true })
+
+    await wrapper.get('[data-test="map-search-keyword"]').setValue('무악동')
+    await wrapper.get('[data-test="map-search-form"]').trigger('submit')
+    await flushPromises()
+    await wrapper.get('[data-test="area-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addArea).toHaveBeenCalledWith(
+      expect.objectContaining({
+        label: '검색: 무악동',
+        centerLat: importedSearchItem.lat,
+        centerLng: importedSearchItem.lng,
+        zoomLevel: 5
+      })
+    )
+  })
+
+  it('restores a favorite area from map query parameters without a Kakao key', async () => {
+    const { wrapper } = await mountMapView({
+      path: '/map?areaLabel=%EA%B2%80%EC%83%89%3A%20%EB%AC%B4%EC%95%85%EB%8F%99&centerLat=37.5738636&centerLng=126.9594466&zoomLevel=6'
+    })
+
+    expect(propertyApiMock.getMapProperties).toHaveBeenCalledWith(
+      expect.objectContaining({
+        swLat: 37.5538636,
+        swLng: 126.9344466,
+        neLat: 37.5938636,
+        neLng: 126.9844466,
+        zoomLevel: 6
+      })
+    )
+    expect(wrapper.text()).toContain('검색: 무악동 관심 지역을 지도로 불러왔습니다.')
+  })
 })
 
 describe('PropertyDetailView transaction summary', () => {
@@ -282,5 +437,67 @@ describe('PropertyDetailView transaction summary', () => {
     expect(wrapper.text()).toContain('최근 거래유형')
     expect(wrapper.text()).toContain('전세')
     expect(wrapper.text()).toContain('최근 거래 1건')
+  })
+
+  it('reflects initial apartment favorite states', async () => {
+    const unfavorited = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(false) })
+    expect(unfavorited.text()).toContain('관심 아파트 추가')
+
+    const favorited = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(true) })
+    expect(favorited.text()).toContain('관심 아파트 삭제')
+  })
+
+  it('adds an apartment favorite and updates the button state', async () => {
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(false) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addApartment).toHaveBeenCalledWith(1912)
+    expect(wrapper.text()).toContain('관심 아파트에 추가했습니다.')
+    expect(wrapper.text()).toContain('관심 아파트 삭제')
+  })
+
+  it('removes an apartment favorite and updates the button state', async () => {
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(true) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.removeApartment).toHaveBeenCalledWith(1912)
+    expect(wrapper.text()).toContain('관심 아파트에서 삭제했습니다.')
+    expect(wrapper.text()).toContain('관심 아파트 추가')
+  })
+
+  it('guides anonymous users to log in before saving favorites', async () => {
+    const wrapper = await mountPropertyDetailView({ detail: detailWithFavorite(false) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(favoritesApiMock.addApartment).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('로그인 후 관심 아파트를 저장할 수 있습니다.')
+  })
+
+  it('handles duplicate favorite creation safely', async () => {
+    favoritesApiMock.addApartment.mockRejectedValueOnce(createApiError('FAVORITE_ALREADY_EXISTS'))
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(false) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('이미 관심 아파트에 저장되어 있습니다.')
+    expect(wrapper.text()).toContain('관심 아파트 삭제')
+  })
+
+  it('handles missing favorite deletion safely', async () => {
+    favoritesApiMock.removeApartment.mockRejectedValueOnce(createApiError('FAVORITE_NOT_FOUND'))
+    const wrapper = await mountPropertyDetailView({ authenticated: true, detail: detailWithFavorite(true) })
+
+    await wrapper.get('[data-test="apartment-favorite-button"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('이미 삭제된 관심 아파트입니다.')
+    expect(wrapper.text()).toContain('관심 아파트 추가')
   })
 })

@@ -32,4 +32,23 @@ public interface FavoriteMapper {
             @Param("userId") Long userId,
             @Param("propertyId") Long propertyId
     );
+
+    List<FavoriteAreaRow> findFavoriteAreas(@Param("userId") Long userId);
+
+    Optional<FavoriteAreaRow> findFavoriteAreaByNormalizedKey(
+            @Param("userId") Long userId,
+            @Param("normalizedKey") String normalizedKey
+    );
+
+    int insertFavoriteArea(@Param("command") FavoriteAreaInsertCommand command);
+
+    int deleteFavoriteArea(
+            @Param("userId") Long userId,
+            @Param("favoriteAreaId") Long favoriteAreaId
+    );
+
+    boolean existsFavoriteAreaByNormalizedKey(
+            @Param("userId") Long userId,
+            @Param("normalizedKey") String normalizedKey
+    );
 }

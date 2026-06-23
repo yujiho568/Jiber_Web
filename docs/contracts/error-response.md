@@ -47,6 +47,7 @@ All public Spring Boot API errors should use this shape:
 | 422 | `VALUATION_UNSUPPORTED_PROPERTY_TYPE` | AI valuation is not available for non-apartment property types. |
 | 422 | `VALUATION_INSUFFICIENT_DATA` | Required model features are missing. |
 | 502 | `MODEL_SERVER_UNAVAILABLE` | Backend could not reach the model server. |
+| 502 | `CHATBOT_UNAVAILABLE` | Backend could not reach the chat model-server endpoint or the chat feature is unavailable. |
 | 500 | `INTERNAL_ERROR` | Unexpected server error. |
 
 ## Security Notes

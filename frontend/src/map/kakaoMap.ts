@@ -23,6 +23,7 @@ export interface KakaoMapLike {
   getBounds(): KakaoBoundsLike
   getLevel(): number
   setCenter?(latLng: unknown): void
+  setLevel?(level: number): void
   panTo?(latLng: unknown): void
 }
 

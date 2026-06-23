@@ -121,6 +121,7 @@ Schema preflight가 통과한 뒤 smoke 순서:
 - Google/Kakao/Naver OAuth2 client registration 환경 변수 연결
 - property, favorite, notice controller/DTO/service skeleton
 - favorite apartments의 로그인 사용자 소유권 기반 MyBatis list/add/delete와 property detail favorite flag 연동
+- favorite areas의 로그인 사용자 소유권 기반 MyBatis list/add/delete
 - property map/search/detail API의 canonical table 기반 MyBatis 조회 skeleton
 - Springdoc OpenAPI 설정
 - MyBatis mapper 위치 설정
@@ -133,7 +134,6 @@ Schema preflight가 통과한 뒤 smoke 순서:
 - Property map/search/detail MyBatis mapper query의 실제 MySQL 통합 검증
 - 실제 Google/Kakao/Naver OAuth app 등록 후 provider별 E2E 로그인 검증
 - refresh token reuse 감지 시 session family revocation SQL의 실제 MySQL 통합 검증
-- favorite areas persistence와 ownership DB mapping
 - model-server feature mapping의 실제 DB/거래 데이터 기반 보강
 - 공지사항 작성자/수정자 기록
 
@@ -197,7 +197,7 @@ Provider console에는 Spring Boot 기본 callback 경로를 등록합니다.
 - Auth / Security Agent: 현재 provider-owned `users` 구조를 email/password `users`, `user_social_accounts`, `oauth_pending_social_sessions` 구조로 마이그레이션하세요.
 - Auth / Security Agent: `POST /api/v1/auth/signup`, `POST /api/v1/auth/login`, `GET /api/v1/auth/social/pending`, `POST /api/v1/auth/social/signup`, `POST /api/v1/auth/social/link`, `GET /api/v1/auth/social-accounts`를 구현하세요.
 - Auth / Security Agent: matching email만으로 social account를 기존 user에 자동 연결하지 마세요. 기존 계정 연동은 이메일/비밀번호 인증 후 진행해야 합니다.
-- Backend API Agent: `AuthUserPrincipal`은 apartment favorite ownership과 property detail favorite flag에 연결되어 있습니다. valuation, SHAP, notice mutation 작성자/수정자 기록은 후속으로 연결하세요.
+- Backend API Agent: `AuthUserPrincipal`은 apartment/area favorite ownership과 property detail favorite flag에 연결되어 있습니다. valuation, SHAP, notice mutation 작성자/수정자 기록은 후속으로 연결하세요.
 - Backend API Agent: `refresh_sessions` mapper query와 recursive session family revocation SQL을 실제 MySQL에서 검증하세요.
 - Frontend / Map Agent: `/login`, `/signup`, `/signup/social` route와 이메일/비밀번호 form, social signup/link UX를 구현하세요.
 - Frontend / Map Agent: 이미 연결된 social login의 `/login/callback` 진입 후 `POST /api/v1/auth/refresh`를 credentials 포함으로 호출하고, access token은 메모리에만 보관하세요.
@@ -245,7 +245,7 @@ schema 초안은 `../db/001_phase1_schema.sql`입니다.
 - `apartment_price_predictions`
 - `apartment_shap_values`
 
-지도 bounds 검색을 위해 `properties(latitude, longitude)`와 `properties(property_type, latitude, longitude)` 인덱스를 포함했습니다. favorite 중복 방지를 위해 `favorite_apartments(user_id, property_id)`와 `favorite_areas(user_id, normalized_key)` unique key를 포함했습니다.
+지도 bounds 검색을 위해 `properties(latitude, longitude)`와 `properties(property_type, latitude, longitude)` 인덱스를 포함했습니다. favorite 중복 방지를 위해 `favorite_apartments(user_id, property_id)`와 `favorite_areas(user_id, normalized_key)` unique key를 포함했습니다. 관심 지역의 `normalized_key`는 표시용 지역/좌표 필드를 정규화한 canonical 문자열의 SHA-256 hash로 생성해 컬럼 길이와 중복 판정을 안정적으로 유지합니다.
 
 추가 public data import schema 초안은 `../db/002_public_data_import.sql`입니다.
 

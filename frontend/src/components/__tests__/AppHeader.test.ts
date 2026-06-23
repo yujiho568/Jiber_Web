@@ -13,6 +13,7 @@ function createTestRouter() {
       { path: '/', component: { template: '<main />' } },
       { path: '/map', component: { template: '<main />' } },
       { path: '/favorites', component: { template: '<main />' } },
+      { path: '/chat', component: { template: '<main />' } },
       { path: '/notices', component: { template: '<main />' } },
       { path: '/admin', component: { template: '<main />' } },
       { path: '/login', component: { template: '<main />' } },

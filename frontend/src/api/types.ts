@@ -259,6 +259,7 @@ export interface ChatContext {
 }
 
 export interface ChatResponse {
+  available: boolean
   answer: string
   contexts: ChatContext[]
   model: string

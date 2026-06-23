@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.jiber.backend.auth.AuthUserPrincipal;
 import com.jiber.backend.common.error.ApiException;
 import com.jiber.backend.common.error.ErrorCode;
+import com.jiber.backend.favorite.FavoriteAreaInsertCommand;
+import com.jiber.backend.favorite.FavoriteAreaRow;
 import com.jiber.backend.favorite.FavoriteApartmentRow;
 import com.jiber.backend.favorite.FavoriteMapper;
 import java.math.BigDecimal;
@@ -310,6 +312,31 @@ class PropertyServiceTest {
         @Override
         public boolean existsFavoriteApartment(Long userId, Long propertyId) {
             return favorites.contains(key(userId, propertyId));
+        }
+
+        @Override
+        public List<FavoriteAreaRow> findFavoriteAreas(Long userId) {
+            return List.of();
+        }
+
+        @Override
+        public Optional<FavoriteAreaRow> findFavoriteAreaByNormalizedKey(Long userId, String normalizedKey) {
+            return Optional.empty();
+        }
+
+        @Override
+        public int insertFavoriteArea(FavoriteAreaInsertCommand command) {
+            return 0;
+        }
+
+        @Override
+        public int deleteFavoriteArea(Long userId, Long favoriteAreaId) {
+            return 0;
+        }
+
+        @Override
+        public boolean existsFavoriteAreaByNormalizedKey(Long userId, String normalizedKey) {
+            return false;
         }
 
         private String key(Long userId, Long propertyId) {

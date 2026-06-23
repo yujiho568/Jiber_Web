@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-import json
-import os
-from dataclasses import dataclass
 from functools import lru_cache
-from pathlib import Path
-
-import chromadb
-from openai import OpenAI
-from pypdf import PdfReader
-from rank_bm25 import BM25Okapi
-from sentence_transformers import CrossEncoder, SentenceTransformer
 
 from app.core.config import Settings, get_settings
 from app.schemas.chat import ChatContext, RagConfig, RealEstateChatResponse
@@ -44,23 +34,19 @@ SOURCE_SUMMARIES = {
         "오피스텔 가격 동향과 아파트 가격 동향 비교 정보를 포함한다."
     ),
 }
+from app.schemas.chat import RagConfig, RealEstateChatResponse
 
 
-@dataclass(frozen=True)
-class ChunkRecord:
-    text: str
-    source: str
+SKELETON_ANSWER = (
+    "부동산 챗봇은 현재 계약 skeleton 단계입니다. "
+    "실제 RAG corpus, vector index, embedding model, reranker, LLM provider는 사용자 구현 후 연결됩니다. "
+    "현 단계에서는 투자 조언, 법률·세무 판단, 매수·매도 추천을 제공하지 않습니다."
+)
 
 
-class RealEstateRagChatService:
+class RealEstateChatService:
     def __init__(self, settings: Settings):
         self.settings = settings
-        self.docs_dir = self._resolve_docs_dir(settings)
-        self.embedder = SentenceTransformer(settings.rag_embedding_model)
-        self.reranker = CrossEncoder(settings.rag_reranker_model)
-        self.openai_client = self._openai_client(settings)
-        self.collection, self.chunks = self._load_or_build_collection(settings)
-        self.bm25 = BM25Okapi([record.text.split() for record in self.chunks])
 
     def answer(self, question: str, runtime_context: dict | None) -> RealEstateChatResponse:
         retrieval = self.retrieve(question, runtime_context)
@@ -305,7 +291,21 @@ class RealEstateRagChatService:
             kwargs["base_url"] = settings.openai_base_url
         return OpenAI(**kwargs)
 
+        return RealEstateChatResponse(
+            available=False,
+            answer=SKELETON_ANSWER,
+            contexts=[],
+            model="chat-skeleton-v1",
+            ragConfig=RagConfig(
+                embedding="disabled",
+                chunkSize=0,
+                overlap=0,
+                hybrid=False,
+                rerank=False,
+            ),
+        )
+
 
 @lru_cache(maxsize=1)
-def get_rag_chat_service() -> RealEstateRagChatService:
-    return RealEstateRagChatService(get_settings())
+def get_rag_chat_service() -> RealEstateChatService:
+    return RealEstateChatService(get_settings())

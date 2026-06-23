@@ -225,6 +225,28 @@ a {
   margin-top: 22px;
 }
 
+.favorite-actions,
+.favorite-item-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.favorite-actions {
+  margin-top: 18px;
+}
+
+.favorite-actions .inline-error,
+.favorite-actions .helper-text {
+  width: 100%;
+  margin: 0;
+}
+
+.favorite-item-actions {
+  justify-content: flex-end;
+}
+
 .primary-button,
 .secondary-button,
 .text-button {
@@ -823,6 +845,8 @@ input[type="range"] {
   }
 
   .button-row,
+  .favorite-actions,
+  .favorite-item-actions,
   .search-row {
     align-items: stretch;
     flex-direction: column;

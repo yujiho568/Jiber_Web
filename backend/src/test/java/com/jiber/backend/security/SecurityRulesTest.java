@@ -1,6 +1,8 @@
 package com.jiber.backend.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -36,6 +38,12 @@ import com.jiber.backend.auth.SocialAccountInsertCommand;
 import com.jiber.backend.auth.SocialAccountMapper;
 import com.jiber.backend.auth.SocialAccountRecord;
 import com.jiber.backend.auth.SocialLoginService;
+import com.jiber.backend.chat.ChatController;
+import com.jiber.backend.chat.ChatResponse;
+import com.jiber.backend.chat.ChatService;
+import com.jiber.backend.chat.RagConfigResponse;
+import com.jiber.backend.favorite.FavoriteAreaInsertCommand;
+import com.jiber.backend.favorite.FavoriteAreaRow;
 import com.jiber.backend.favorite.FavoriteApartmentRow;
 import com.jiber.backend.favorite.FavoriteController;
 import com.jiber.backend.favorite.FavoriteMapper;
@@ -55,6 +63,7 @@ import java.util.Set;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Bean;
@@ -69,7 +78,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = {
         AuthController.class,
         FavoriteController.class,
-        AdminNoticeController.class
+        AdminNoticeController.class,
+        ChatController.class
 })
 @Import({
         SecurityConfig.class,
@@ -84,6 +94,9 @@ class SecurityRulesTest {
 
     @Autowired
     private AuthUserMapper authUserMapper;
+
+    @MockBean
+    private ChatService chatService;
 
     @Test
     void getMeAllowsAnonymousAndReturnsUnauthenticatedBody() throws Exception {
@@ -232,6 +245,10 @@ class SecurityRulesTest {
         mockMvc.perform(get("/api/v1/favorites/apartments"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+
+        mockMvc.perform(get("/api/v1/favorites/areas"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
     }
 
     @Test
@@ -240,6 +257,52 @@ class SecurityRulesTest {
                         .with(authentication(authPrincipal(1L, "USER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isArray());
+
+        mockMvc.perform(get("/api/v1/favorites/areas")
+                        .with(authentication(authPrincipal(1L, "USER"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isArray());
+    }
+
+    @Test
+    void chatRequiresAuthentication() throws Exception {
+        var body = """
+                {
+                  "question": "전세 계약 전에 무엇을 확인해야 하나요?"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/chat/real-estate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+    }
+
+    @Test
+    void userCanAccessChatSkeletonEndpoint() throws Exception {
+        var body = """
+                {
+                  "question": "전세 계약 전에 무엇을 확인해야 하나요?"
+                }
+                """;
+
+        when(chatService.ask(any())).thenReturn(new ChatResponse(
+                false,
+                "챗봇은 현재 skeleton 단계입니다.",
+                List.of(),
+                "chat-skeleton-v1",
+                new RagConfigResponse("disabled", 0, 0, false, false)
+        ));
+
+        mockMvc.perform(post("/api/v1/chat/real-estate")
+                        .with(authentication(authPrincipal(1L, "USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false))
+                .andExpect(jsonPath("$.model").value("chat-skeleton-v1"))
+                .andExpect(jsonPath("$.ragConfig.embedding").value("disabled"));
     }
 
     @Test
@@ -259,6 +322,85 @@ class SecurityRulesTest {
         mockMvc.perform(delete("/api/v1/favorites/apartments/1001"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+
+        var areaBody = """
+                {
+                  "label": "강남구 역삼동",
+                  "sido": "서울특별시",
+                  "sigungu": "강남구",
+                  "legalDong": "역삼동"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/favorites/areas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(areaBody))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+
+        mockMvc.perform(delete("/api/v1/favorites/areas/801"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+    }
+
+    @Test
+    void invalidFavoriteAreaPayloadReturnsValidationFailed() throws Exception {
+        var body = """
+                {
+                  "label": "   ",
+                  "centerLat": 37.5001
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/favorites/areas")
+                        .with(authentication(authPrincipal(1L, "USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+    }
+
+    @Test
+    void oversizedFavoriteAreaLabelReturnsValidationFailed() throws Exception {
+        var body = """
+                {
+                  "label": "%s",
+                  "sido": "서울특별시"
+                }
+                """.formatted("가".repeat(121));
+
+        mockMvc.perform(post("/api/v1/favorites/areas")
+                        .with(authentication(authPrincipal(1L, "USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+    }
+
+    @Test
+    void oversizedFavoriteAreaRegionFieldsReturnValidationFailed() throws Exception {
+        var tooLong = "가".repeat(101);
+
+        mockMvc.perform(post("/api/v1/favorites/areas")
+                        .with(authentication(authPrincipal(1L, "USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(areaBody("지역", tooLong, null, null)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+
+        mockMvc.perform(post("/api/v1/favorites/areas")
+                        .with(authentication(authPrincipal(1L, "USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(areaBody("지역", "서울특별시", tooLong, null)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+
+        mockMvc.perform(post("/api/v1/favorites/areas")
+                        .with(authentication(authPrincipal(1L, "USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(areaBody("지역", "서울특별시", "강남구", tooLong)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
     }
 
     @Test
@@ -486,6 +628,40 @@ class SecurityRulesTest {
             public boolean existsFavoriteApartment(Long userId, Long propertyId) {
                 return false;
             }
+
+            @Override
+            public List<FavoriteAreaRow> findFavoriteAreas(Long userId) {
+                return List.of();
+            }
+
+            @Override
+            public Optional<FavoriteAreaRow> findFavoriteAreaByNormalizedKey(Long userId, String normalizedKey) {
+                var row = new FavoriteAreaRow();
+                row.setFavoriteAreaId(801L);
+                row.setLabel("강남구 역삼동");
+                row.setSido("서울특별시");
+                row.setSigungu("강남구");
+                row.setLegalDong("역삼동");
+                row.setZoomLevel(5);
+                row.setNormalizedKey(normalizedKey);
+                row.setCreatedAt(OffsetDateTime.parse("2026-06-15T16:00:00+09:00"));
+                return Optional.of(row);
+            }
+
+            @Override
+            public int insertFavoriteArea(FavoriteAreaInsertCommand command) {
+                return 1;
+            }
+
+            @Override
+            public int deleteFavoriteArea(Long userId, Long favoriteAreaId) {
+                return 1;
+            }
+
+            @Override
+            public boolean existsFavoriteAreaByNormalizedKey(Long userId, String normalizedKey) {
+                return false;
+            }
         }
 
         private static class SecurityRefreshSessionMapper implements RefreshSessionMapper {
@@ -585,5 +761,21 @@ class SecurityRulesTest {
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_" + role))
         );
+    }
+
+    private String areaBody(String label, String sido, String sigungu, String legalDong) {
+        var sidoField = sido == null ? "" : "\"sido\": \"" + sido + "\",";
+        var sigunguField = sigungu == null ? "" : "\"sigungu\": \"" + sigungu + "\",";
+        var legalDongField = legalDong == null ? "" : "\"legalDong\": \"" + legalDong + "\",";
+        return """
+                {
+                  "label": "%s",
+                  %s
+                  %s
+                  %s
+                  "centerLat": 37.5001,
+                  "centerLng": 127.0364
+                }
+                """.formatted(label, sidoField, sigunguField, legalDongField);
     }
 }

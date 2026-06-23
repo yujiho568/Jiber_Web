@@ -21,10 +21,12 @@ const props = withDefaults(
     items: PropertyMapItem[]
     selectedPropertyId?: number | null
     focusTarget?: LatLngPoint | null
+    focusZoomLevel?: number | null
   }>(),
   {
     selectedPropertyId: null,
-    focusTarget: null
+    focusTarget: null,
+    focusZoomLevel: null
   }
 )
 
@@ -89,6 +91,10 @@ function focusMap(target: LatLngPoint | null) {
   }
 
   const latLng = new kakaoMaps.LatLng(target.lat, target.lng)
+  if (props.focusZoomLevel) {
+    map.setLevel?.(props.focusZoomLevel)
+  }
+
   if (map.panTo) {
     map.panTo(latLng)
     return
@@ -133,7 +139,7 @@ onMounted(async () => {
 })
 
 watch(() => [props.items, props.selectedPropertyId], renderMarkers, { deep: true })
-watch(() => props.focusTarget, focusMap, { deep: true })
+watch(() => [props.focusTarget, props.focusZoomLevel], () => focusMap(props.focusTarget), { deep: true })
 
 onBeforeUnmount(() => {
   if (idleTimer) {

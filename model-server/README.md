@@ -10,6 +10,7 @@ FastAPI 기반 Phase 1 모델 서버 skeleton입니다. 아파트 전용 valuati
 
 - Phase 1 skeleton은 Python 패키지 배포보다 로컬 실행과 테스트 검증이 우선입니다.
 - `pip install -r requirements.txt`만으로 FastAPI, Pydantic, uvicorn, pytest, httpx를 바로 설치할 수 있습니다.
+- Chat skeleton은 OpenAI client, ChromaDB, SentenceTransformer, CrossEncoder, PDF parser, vector index, corpus 파일을 필요로 하지 않습니다.
 - `setup.py`는 dependency 관리가 아니라 repo root에서도 `app.main`을 import할 수 있게 하는 editable package metadata입니다.
 - 패키징, formatter, linter, model artifact 관리가 추가되면 이후 `pyproject.toml`로 전환할 수 있습니다.
 
@@ -70,8 +71,32 @@ Spring Boot backend만 이 서버를 호출해야 합니다. Vue frontend는 이
 - `GET /health`
 - `POST /internal/v1/valuation/apartments`
 - `POST /internal/v1/shap/apartments`
+- `POST /internal/v1/chat/real-estate`
 
 public valuation과 SHAP route는 Spring Boot의 `/api/v1/properties/{propertyId}/valuation`, `/api/v1/properties/{propertyId}/shap`입니다. 사용자 인증, 권한, public error response 변환은 Spring Boot가 담당합니다.
+public chat route 후보는 Spring Boot의 `/api/v1/chat/real-estate`이며, MVP skeleton에서는 `USER` 또는 `ADMIN` 인증을 요구합니다. Vue frontend는 model-server를 직접 호출하지 않습니다.
+
+## Chat Skeleton 동작
+
+현재 chat endpoint는 contract 검증용 skeleton입니다. 실제 RAG corpus, vector index, embedding model, reranker, LLM provider, prompt policy는 사용자가 구현한 뒤 연결합니다.
+
+```json
+{
+  "available": false,
+  "answer": "부동산 챗봇은 현재 계약 skeleton 단계입니다. 실제 RAG corpus, vector index, embedding model, reranker, LLM provider는 사용자 구현 후 연결됩니다. 현 단계에서는 투자 조언, 법률·세무 판단, 매수·매도 추천을 제공하지 않습니다.",
+  "contexts": [],
+  "model": "chat-skeleton-v1",
+  "ragConfig": {
+    "embedding": "disabled",
+    "chunkSize": 0,
+    "overlap": 0,
+    "hybrid": false,
+    "rerank": false
+  }
+}
+```
+
+Local-only corpus or generated indexes may be placed under ignored artifact/storage paths such as `model-server/documents/`, `model-server/artifacts/`, `model-server/cache/`, or `model-server/vector_index/` during user-owned implementation work. Do not commit those files.
 
 ## Deterministic Skeleton 동작
 
@@ -116,4 +141,4 @@ public API의 `VALUATION_INSUFFICIENT_DATA` error shape 변환은 Spring Boot ba
 - 아파트 전용 internal API입니다.
 - 비아파트 unsupported 판단은 기본적으로 Spring Boot public layer에서 처리합니다.
 - OAuth2/JWT 사용자 인증은 이 서버가 소유하지 않습니다.
-- 실제 모델 artifact, 모델 경로, API key, OAuth secret, JWT secret, internal token 값은 저장소에 포함하지 않습니다.
+- 실제 모델 artifact, RAG corpus, vector index, 모델 경로, API key, OAuth secret, JWT secret, internal token 값은 저장소에 포함하지 않습니다.

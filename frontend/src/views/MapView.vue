@@ -1,18 +1,29 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
+import { favoritesApi } from '@/api/favorites'
+import { getApiError } from '@/api/client'
 import { propertyApi } from '@/api/property'
-import type { PropertyMapItem, PropertySearchItem, PropertyType, TransactionType } from '@/api/types'
+import type {
+  FavoriteAreaCreateRequest,
+  PropertyMapItem,
+  PropertySearchItem,
+  PropertyType,
+  TransactionType
+} from '@/api/types'
 import KakaoMapPanel from '@/components/KakaoMapPanel.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { SEOUL_SEED_VIEWPORT, type LatLngPoint, type MapViewport } from '@/map/kakaoMap'
 import { hasKakaoMapKey } from '@/map/kakaoLoader'
+import { useAuthStore } from '@/stores/auth'
 import { formatKrw, propertyTypeLabel, transactionTypeLabel } from '@/utils/format'
 
 const propertyTypeOptions: PropertyType[] = ['APARTMENT', 'OFFICETEL', 'VILLA', 'HOUSE']
 const transactionTypeOptions: TransactionType[] = ['SALE', 'JEONSE', 'MONTHLY_RENT']
 
+const route = useRoute()
+const authStore = useAuthStore()
 const selectedPropertyTypes = ref<PropertyType[]>(['APARTMENT'])
 const selectedTransactionTypes = ref<TransactionType[]>([...transactionTypeOptions])
 const zoomLevel = ref(SEOUL_SEED_VIEWPORT.zoomLevel)
@@ -25,9 +36,16 @@ const searchKeyword = ref('')
 const activeSearchKeyword = ref('')
 const mapFocusTarget = ref<LatLngPoint | null>(null)
 const hasMapKey = hasKakaoMapKey()
+const areaFavoriteLoading = ref(false)
+const areaFavoriteMessage = ref('')
+const areaFavoriteErrorMessage = ref('')
 let searchTimer: number | null = null
 
 const isKeywordSearch = computed(() => activeSearchKeyword.value.length > 0)
+const currentAreaLabel = computed(() => {
+  const keyword = activeSearchKeyword.value.trim()
+  return keyword ? `검색: ${keyword}` : '현재 지도 영역'
+})
 
 const resultDescription = computed(() => {
   if (loading.value) {
@@ -47,6 +65,144 @@ const resultDescription = computed(() => {
     ? `"${activeSearchKeyword.value}"에 맞는 검색 결과가 없습니다. 검색어 또는 거래 조건을 조정해 보세요.`
     : '현재 조건에 맞는 검색 결과가 없습니다.'
 })
+
+function roundCoordinate(value: number) {
+  return Number(value.toFixed(7))
+}
+
+function viewportCenter(viewport: MapViewport): LatLngPoint {
+  return {
+    lat: roundCoordinate((viewport.swLat + viewport.neLat) / 2),
+    lng: roundCoordinate((viewport.swLng + viewport.neLng) / 2)
+  }
+}
+
+function readQueryString(value: unknown): string | null {
+  const rawValue = Array.isArray(value) ? value[0] : value
+  if (typeof rawValue !== 'string') {
+    return null
+  }
+
+  const trimmed = rawValue.trim()
+  return trimmed || null
+}
+
+function readQueryNumber(value: unknown): number | null {
+  const rawValue = readQueryString(value)
+  if (!rawValue) {
+    return null
+  }
+
+  const parsed = Number(rawValue)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function clampZoomLevel(value: number | null): number {
+  if (value === null) {
+    return SEOUL_SEED_VIEWPORT.zoomLevel
+  }
+
+  return Math.min(14, Math.max(1, Math.round(value)))
+}
+
+function viewportAroundCenter(center: LatLngPoint, nextZoomLevel: number): MapViewport {
+  const latSpan = SEOUL_SEED_VIEWPORT.neLat - SEOUL_SEED_VIEWPORT.swLat
+  const lngSpan = SEOUL_SEED_VIEWPORT.neLng - SEOUL_SEED_VIEWPORT.swLng
+
+  return {
+    swLat: roundCoordinate(center.lat - latSpan / 2),
+    swLng: roundCoordinate(center.lng - lngSpan / 2),
+    neLat: roundCoordinate(center.lat + latSpan / 2),
+    neLng: roundCoordinate(center.lng + lngSpan / 2),
+    zoomLevel: nextZoomLevel
+  }
+}
+
+function restoreFavoriteAreaFromQuery(): MapViewport | null {
+  const centerLat = readQueryNumber(route.query.centerLat)
+  const centerLng = readQueryNumber(route.query.centerLng)
+
+  if (centerLat === null || centerLng === null) {
+    return null
+  }
+
+  const nextZoomLevel = clampZoomLevel(readQueryNumber(route.query.zoomLevel))
+  const nextViewport = viewportAroundCenter({ lat: centerLat, lng: centerLng }, nextZoomLevel)
+  currentViewport.value = nextViewport
+  zoomLevel.value = nextViewport.zoomLevel
+  mapFocusTarget.value = { lat: centerLat, lng: centerLng }
+
+  const label = readQueryString(route.query.areaLabel)
+  if (label) {
+    areaFavoriteMessage.value = `${label} 관심 지역을 지도로 불러왔습니다.`
+  }
+
+  return nextViewport
+}
+
+function selectedOrFirstResult(): PropertyMapItem | null {
+  return (
+    items.value.find((item) => item.propertyId === selectedPropertyId.value) ??
+    items.value.find((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng)) ??
+    null
+  )
+}
+
+function buildFavoriteAreaPayload(): FavoriteAreaCreateRequest {
+  const selectedResult = isKeywordSearch.value ? selectedOrFirstResult() : null
+  const center = selectedResult
+    ? { lat: selectedResult.lat, lng: selectedResult.lng }
+    : viewportCenter(currentViewport.value)
+
+  return {
+    label: currentAreaLabel.value,
+    centerLat: roundCoordinate(center.lat),
+    centerLng: roundCoordinate(center.lng),
+    zoomLevel: zoomLevel.value
+  }
+}
+
+function setAreaFavoriteFailure(error: unknown) {
+  const apiError = getApiError(error)
+
+  if (apiError?.code === 'FAVORITE_AREA_ALREADY_EXISTS') {
+    areaFavoriteMessage.value = '이미 관심 지역에 저장되어 있습니다.'
+    return
+  }
+
+  if (apiError?.code === 'VALIDATION_FAILED') {
+    areaFavoriteErrorMessage.value = '관심 지역 정보를 저장할 수 없습니다. 지도를 이동한 뒤 다시 시도해 주세요.'
+    return
+  }
+
+  if (apiError?.code === 'AUTH_REQUIRED') {
+    areaFavoriteErrorMessage.value = '로그인이 필요한 기능입니다. 로그인 후 다시 시도해 주세요.'
+    return
+  }
+
+  areaFavoriteErrorMessage.value = '관심 지역을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'
+}
+
+async function saveCurrentAreaFavorite() {
+  areaFavoriteMessage.value = ''
+  areaFavoriteErrorMessage.value = ''
+
+  if (!authStore.isAuthenticated) {
+    areaFavoriteErrorMessage.value = '로그인 후 관심 지역을 저장할 수 있습니다.'
+    return
+  }
+
+  areaFavoriteLoading.value = true
+
+  try {
+    await favoritesApi.addArea(buildFavoriteAreaPayload())
+    areaFavoriteMessage.value = '관심 지역에 추가했습니다.'
+  } catch (error) {
+    setAreaFavoriteFailure(error)
+  } finally {
+    areaFavoriteLoading.value = false
+  }
+}
 
 function toMapItem(item: PropertySearchItem): PropertyMapItem {
   return {
@@ -184,8 +340,10 @@ function selectProperty(propertyId: number) {
 }
 
 onMounted(() => {
+  const restoredViewport = restoreFavoriteAreaFromQuery()
+
   if (!hasMapKey) {
-    void searchVisibleArea(SEOUL_SEED_VIEWPORT)
+    void searchVisibleArea(restoredViewport ?? SEOUL_SEED_VIEWPORT)
   }
 })
 
@@ -258,6 +416,20 @@ onBeforeUnmount(() => {
         {{ loading ? '검색 중입니다' : '현재 지도 범위로 검색' }}
       </button>
 
+      <div class="favorite-actions map-favorite-actions">
+        <button
+          class="secondary-button full-width"
+          data-test="area-favorite-button"
+          type="button"
+          :disabled="areaFavoriteLoading"
+          @click="saveCurrentAreaFavorite"
+        >
+          {{ areaFavoriteLoading ? '저장 중입니다' : '이 지역 관심 등록' }}
+        </button>
+        <p v-if="areaFavoriteMessage" class="helper-text">{{ areaFavoriteMessage }}</p>
+        <p v-if="areaFavoriteErrorMessage" class="inline-error">{{ areaFavoriteErrorMessage }}</p>
+      </div>
+
       <p v-if="errorMessage" class="inline-error">{{ errorMessage }}</p>
       <p class="helper-text">
         {{ hasMapKey ? '지도를 이동하면 현재 화면 범위로 다시 검색합니다.' : '지도 키가 없으면 기본 강남권 범위로 검색합니다.' }}
@@ -269,6 +441,7 @@ onBeforeUnmount(() => {
         :items="items"
         :selected-property-id="selectedPropertyId"
         :focus-target="mapFocusTarget"
+        :focus-zoom-level="zoomLevel"
         @ready="handleMapReady"
         @bounds-changed="handleBoundsChanged"
         @property-selected="selectProperty"

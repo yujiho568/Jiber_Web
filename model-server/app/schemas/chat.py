@@ -21,6 +21,7 @@ class RagConfig(BaseModel):
 
 
 class RealEstateChatResponse(BaseModel):
+    available: bool
     answer: str
     contexts: list[ChatContext]
     model: str

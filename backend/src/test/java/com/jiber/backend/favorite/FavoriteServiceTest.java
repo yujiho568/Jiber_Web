@@ -120,6 +120,87 @@ class FavoriteServiceTest {
                         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.AUTH_REQUIRED));
     }
 
+    @Test
+    void userCanAddListAndDeleteOwnFavoriteArea() {
+        var mapper = new FakeFavoriteMapper();
+        var service = new FavoriteService(mapper);
+
+        var created = service.addFavoriteArea(1L, areaRequest());
+        var list = service.listFavoriteAreas(1L);
+        var deleted = service.removeFavoriteArea(1L, created.favoriteAreaId());
+
+        assertThat(created.label()).isEqualTo("강남구 역삼동");
+        assertThat(list.items()).singleElement().satisfies(item -> {
+            assertThat(item.favoriteAreaId()).isEqualTo(created.favoriteAreaId());
+            assertThat(item.sido()).isEqualTo("서울특별시");
+            assertThat(item.sigungu()).isEqualTo("강남구");
+            assertThat(item.legalDong()).isEqualTo("역삼동");
+            assertThat(item.centerLat()).isEqualByComparingTo("37.5001000");
+            assertThat(item.centerLng()).isEqualByComparingTo("127.0364000");
+            assertThat(item.zoomLevel()).isEqualTo(5);
+        });
+        assertThat(deleted.favoriteAreaId()).isEqualTo(created.favoriteAreaId());
+        assertThat(service.listFavoriteAreas(1L).items()).isEmpty();
+    }
+
+    @Test
+    void duplicateAreaAddReturnsConflictAndDoesNotCreateSecondRow() {
+        var mapper = new FakeFavoriteMapper();
+        var service = new FavoriteService(mapper);
+
+        service.addFavoriteArea(1L, areaRequest());
+
+        assertThatThrownBy(() -> service.addFavoriteArea(1L, areaRequest()))
+                .isInstanceOfSatisfying(ApiException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.FAVORITE_AREA_ALREADY_EXISTS));
+        assertThat(service.listFavoriteAreas(1L).items()).hasSize(1);
+    }
+
+    @Test
+    void userCannotListOrDeleteAnotherUsersFavoriteArea() {
+        var mapper = new FakeFavoriteMapper();
+        var service = new FavoriteService(mapper);
+        var created = service.addFavoriteArea(1L, areaRequest());
+
+        assertThat(service.listFavoriteAreas(2L).items()).isEmpty();
+        assertThatThrownBy(() -> service.removeFavoriteArea(2L, created.favoriteAreaId()))
+                .isInstanceOfSatisfying(ApiException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.FAVORITE_AREA_NOT_FOUND));
+        assertThat(service.listFavoriteAreas(1L).items()).hasSize(1);
+    }
+
+    @Test
+    void missingFavoriteAreaDeleteReturnsNotFound() {
+        var mapper = new FakeFavoriteMapper();
+        var service = new FavoriteService(mapper);
+
+        assertThatThrownBy(() -> service.removeFavoriteArea(1L, 404L))
+                .isInstanceOfSatisfying(ApiException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.FAVORITE_AREA_NOT_FOUND));
+    }
+
+    @Test
+    void favoriteAreaOperationsRequireUserId() {
+        var mapper = new FakeFavoriteMapper();
+        var service = new FavoriteService(mapper);
+
+        assertThatThrownBy(() -> service.listFavoriteAreas(null))
+                .isInstanceOfSatisfying(ApiException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.AUTH_REQUIRED));
+    }
+
+    private FavoriteAreaCreateRequest areaRequest() {
+        return new FavoriteAreaCreateRequest(
+                " 강남구  역삼동 ",
+                "서울특별시",
+                "강남구",
+                "역삼동",
+                new BigDecimal("37.5001000"),
+                new BigDecimal("127.0364000"),
+                5
+        );
+    }
+
     private static class FakeFavoriteMapper implements FavoriteMapper {
 
         private final Map<Long, PropertyType> propertyTypes = Map.of(
@@ -128,7 +209,10 @@ class FavoriteServiceTest {
                 1901L, PropertyType.OFFICETEL
         );
         private final Map<String, FavoriteApartmentRow> favoritesByUserAndProperty = new HashMap<>();
+        private final Map<String, FavoriteAreaRow> areasByUserAndNormalizedKey = new HashMap<>();
+        private final Map<Long, FavoriteAreaRow> areasById = new HashMap<>();
         private long nextFavoriteId = 1L;
+        private long nextFavoriteAreaId = 801L;
 
         @Override
         public Optional<PropertyType> findPropertyTypeById(Long propertyId) {
@@ -170,6 +254,49 @@ class FavoriteServiceTest {
             return favoritesByUserAndProperty.containsKey(key(userId, propertyId));
         }
 
+        @Override
+        public List<FavoriteAreaRow> findFavoriteAreas(Long userId) {
+            var prefix = userId + ":";
+            return areasByUserAndNormalizedKey.entrySet().stream()
+                    .filter(entry -> entry.getKey().startsWith(prefix))
+                    .map(Map.Entry::getValue)
+                    .sorted(Comparator.comparing(FavoriteAreaRow::getCreatedAt).reversed())
+                    .toList();
+        }
+
+        @Override
+        public Optional<FavoriteAreaRow> findFavoriteAreaByNormalizedKey(Long userId, String normalizedKey) {
+            return Optional.ofNullable(areasByUserAndNormalizedKey.get(key(userId, normalizedKey)));
+        }
+
+        @Override
+        public int insertFavoriteArea(FavoriteAreaInsertCommand command) {
+            var key = key(command.userId(), command.normalizedKey());
+            if (areasByUserAndNormalizedKey.containsKey(key)) {
+                return 0;
+            }
+            var row = areaRow(command);
+            areasByUserAndNormalizedKey.put(key, row);
+            areasById.put(row.getFavoriteAreaId(), row);
+            return 1;
+        }
+
+        @Override
+        public int deleteFavoriteArea(Long userId, Long favoriteAreaId) {
+            var row = areasById.get(favoriteAreaId);
+            if (row == null || !areasByUserAndNormalizedKey.containsKey(key(userId, row.getNormalizedKey()))) {
+                return 0;
+            }
+            areasByUserAndNormalizedKey.remove(key(userId, row.getNormalizedKey()));
+            areasById.remove(favoriteAreaId);
+            return 1;
+        }
+
+        @Override
+        public boolean existsFavoriteAreaByNormalizedKey(Long userId, String normalizedKey) {
+            return areasByUserAndNormalizedKey.containsKey(key(userId, normalizedKey));
+        }
+
         private FavoriteApartmentRow row(Long userId, Long propertyId) {
             var row = new FavoriteApartmentRow();
             row.setFavoriteId(nextFavoriteId++);
@@ -186,8 +313,23 @@ class FavoriteServiceTest {
             return row;
         }
 
-        private String key(Long userId, Long propertyId) {
-            return userId + ":" + propertyId;
+        private FavoriteAreaRow areaRow(FavoriteAreaInsertCommand command) {
+            var row = new FavoriteAreaRow();
+            row.setFavoriteAreaId(nextFavoriteAreaId++);
+            row.setLabel(command.label());
+            row.setSido(command.sido());
+            row.setSigungu(command.sigungu());
+            row.setLegalDong(command.legalDong());
+            row.setCenterLat(command.centerLat());
+            row.setCenterLng(command.centerLng());
+            row.setZoomLevel(command.zoomLevel());
+            row.setNormalizedKey(command.normalizedKey());
+            row.setCreatedAt(OffsetDateTime.parse("2026-06-15T16:00:00+09:00").plusSeconds(command.userId()));
+            return row;
+        }
+
+        private String key(Long userId, Object value) {
+            return userId + ":" + value;
         }
     }
 }

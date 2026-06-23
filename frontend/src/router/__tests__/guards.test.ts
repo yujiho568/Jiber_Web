@@ -84,6 +84,13 @@ describe('canAccessRoute', () => {
     expect(router.hasRoute('social-signup')).toBe(true)
   })
 
+  it('requires USER authentication for the chat route', () => {
+    expect(router.getRoutes().find((route) => route.name === 'chat')?.meta).toMatchObject({
+      requiresAuth: true,
+      roles: ['USER', 'ADMIN']
+    })
+  })
+
   it('marks login and signup routes as guest-only', () => {
     expect(router.getRoutes().find((route) => route.name === 'login')?.meta.guestOnly).toBe(true)
     expect(router.getRoutes().find((route) => route.name === 'signup')?.meta.guestOnly).toBe(true)
@@ -142,6 +149,16 @@ describe('canAccessRoute', () => {
     expect(router.currentRoute.value.name).toBe('login')
     expect(router.currentRoute.value.query.auth).toBe('AUTH_REQUIRED')
     expect(router.currentRoute.value.query.redirect).toBe('/favorites?case=protected-refresh-failure')
+  })
+
+  it('allows authenticated users to visit favorites after refresh restore', async () => {
+    const refreshSpy = vi.spyOn(authApi, 'refresh').mockResolvedValueOnce(sessionResponse)
+
+    const store = await visit('/favorites?case=protected-refresh-success')
+
+    expect(refreshSpy).toHaveBeenCalledTimes(1)
+    expect(store.isAuthenticated).toBe(true)
+    expect(router.currentRoute.value.name).toBe('favorites')
   })
 
   it('does not bootstrap refresh on login callback route', async () => {

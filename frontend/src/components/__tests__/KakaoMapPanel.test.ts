@@ -22,6 +22,7 @@ const kakaoMock = vi.hoisted(() => {
       })),
       getLevel: vi.fn(() => 5),
       panTo: vi.fn(),
+      setLevel: vi.fn(),
       setCenter: vi.fn()
     },
     markers: [] as Array<{ setMap: ReturnType<typeof vi.fn>; title: string }>
@@ -98,6 +99,7 @@ describe('KakaoMapPanel', () => {
     kakaoMock.state.mapInstance.getBounds.mockClear()
     kakaoMock.state.mapInstance.getLevel.mockClear()
     kakaoMock.state.mapInstance.panTo.mockClear()
+    kakaoMock.state.mapInstance.setLevel.mockClear()
     kakaoMock.state.mapInstance.setCenter.mockClear()
     kakaoMock.maps.LatLng.mockClear()
     kakaoMock.maps.Size.mockClear()
@@ -192,10 +194,12 @@ describe('KakaoMapPanel', () => {
         focusTarget: {
           lat: 37.5738636,
           lng: 126.9594466
-        }
+        },
+        focusZoomLevel: 6
       })
       await flushPromises()
 
+      expect(kakaoMock.state.mapInstance.setLevel).toHaveBeenCalledWith(6)
       expect(kakaoMock.state.mapInstance.panTo).toHaveBeenCalledWith({
         lat: 37.5738636,
         lng: 126.9594466

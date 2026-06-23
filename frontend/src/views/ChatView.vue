@@ -21,7 +21,7 @@ interface SourceSummary {
 const messages = ref<ChatMessage[]>([
   {
     role: 'assistant',
-    content: '부동산 계약, 실거래, 통계, 가격예측/XAI 문서에 근거해서 답변합니다.'
+    content: '부동산 챗봇은 현재 계약 skeleton 단계입니다. 실제 RAG와 모델은 추후 연결됩니다.'
   }
 ])
 const question = ref('')
@@ -33,41 +33,6 @@ const chatContextStore = useChatContextStore()
 const canSubmit = computed(() => question.value.trim().length > 0 && !loading.value)
 const activeContext = computed(() => chatContextStore.runtimeContext)
 const estimatedPriceText = computed(() => formatKrw(activeContext.value?.valuation?.estimatedPrice))
-
-const SOURCE_LABELS: Record<string, string> = {
-  'r_one_2026_05_housing_price_trend_report.pdf': '2026년 5월 전국주택가격동향조사 보고서',
-  'r_one_2026_05_housing_price_trend_report.md': '2026년 5월 전국주택가격동향조사 보고서',
-  'r_one_2026_04_apartment_actual_transaction_price_index_report.pdf': '2026년 4월 공동주택 실거래가격지수 보고서',
-  'r_one_2026_04_apartment_actual_transaction_price_index_report.md': '2026년 4월 공동주택 실거래가격지수 보고서',
-  'r_one_2026_05_officetel_price_trend_report.pdf': '2026년 5월 오피스텔가격동향조사 보고서',
-  'r_one_2026_05_officetel_price_trend_report.md': '2026년 5월 오피스텔가격동향조사 보고서',
-  'r_one_2026_06_15_weekly_apartment_price_trend_table.md': '2026년 6월 15일 기준 주간아파트가격 동향 통계표',
-  'safe_jeonse_contract_checklist.pdf': '안심 전세계약 체크리스트',
-  'safe_jeonse_contract_checklist.md': '안심 전세계약 체크리스트',
-  'rtms_main.txt': '국토교통부 실거래가 공개시스템 안내',
-  'rtms_main.md': '국토교통부 실거래가 공개시스템 안내',
-  'rtech_faq.txt': '부동산테크 FAQ',
-  'rtech_faq.md': '부동산테크 FAQ',
-  'rtech_library.txt': '부동산테크 자료실',
-  'rtech_library.md': '부동산테크 자료실',
-  'r_one_statistics_dictionary.txt': '한국부동산원 R-ONE 통계용어 사전',
-  'r_one_statistics_dictionary.md': '한국부동산원 R-ONE 통계용어 사전',
-  'r_one_stat_meta.txt': '한국부동산원 R-ONE 통계 메타 설명',
-  'r_one_stat_meta.md': '한국부동산원 R-ONE 통계 메타 설명',
-  'r_one_reports.txt': '한국부동산원 R-ONE 공표보고서 목록',
-  'r_one_reports.md': '한국부동산원 R-ONE 공표보고서 목록',
-  'r_one_main.md': '한국부동산원 R-ONE 서비스 안내',
-  'rtech_main.md': '부동산테크 서비스 안내',
-  'law_real_estate_transaction_reporting.md': '부동산 거래신고 등에 관한 법률 안내',
-  'law_real_estate_transaction_reporting_detail.txt': '부동산 거래신고 등에 관한 법률',
-  'law_real_estate_transaction_reporting_detail.md': '부동산 거래신고 등에 관한 법률',
-  'law_housing_lease_protection_detail.txt': '주택임대차보호법',
-  'law_housing_lease_protection_detail.md': '주택임대차보호법',
-  'law_licensed_real_estate_agent_detail.txt': '공인중개사법',
-  'law_licensed_real_estate_agent_detail.md': '공인중개사법',
-  'law_apartment_management_detail.txt': '공동주택관리법',
-  'law_apartment_management_detail.md': '공동주택관리법'
-}
 
 function renderMessage(content: string): string {
   return content
@@ -82,7 +47,7 @@ function renderMessage(content: string): string {
 function sourceLabel(source: string): string {
   const normalizedSource = source.split('#')[0]
   const fileName = normalizedSource.split('/').pop() ?? normalizedSource
-  return SOURCE_LABELS[fileName] ?? fileName.replace(/\.[^.]+$/, '')
+  return fileName.replace(/\.[^.]+$/, '')
 }
 
 function sourceKey(source: string): string {
@@ -132,7 +97,7 @@ async function submitQuestion() {
       contexts: response.contexts
     })
   } catch {
-    errorMessage.value = '챗봇 답변을 불러오지 못했습니다. model-server와 백엔드 연결을 확인해 주세요.'
+    errorMessage.value = '챗봇 답변을 불러오지 못했습니다. 백엔드 연결을 확인해 주세요.'
   } finally {
     loading.value = false
   }
@@ -149,14 +114,14 @@ onMounted(() => {
 
 <template>
   <section class="page-heading">
-    <p class="eyebrow">RAG 챗봇</p>
-    <h1>부동산 문서 챗봇</h1>
-    <p>전세 계약, 실거래, 통계, 가격예측과 XAI 설명에 관한 질문을 문서 기반으로 확인하세요.</p>
+    <p class="eyebrow">AI 챗봇</p>
+    <h1>부동산 챗봇</h1>
+    <p>전세 계약, 실거래, 가격예측과 XAI 설명에 관한 질문을 남길 수 있습니다.</p>
   </section>
 
   <section class="chat-layout">
     <article class="chat-notice">
-      챗봇 답변은 문서와 입력된 분석 컨텍스트를 바탕으로 한 참고용 정보입니다. 실제 계약, 매수·매도, 법적 판단은 전문가와 공식 자료를 함께 확인하세요.
+      챗봇 답변은 참고용 정보입니다. 실제 계약, 매수·매도, 법률·세무 판단은 전문가와 공식 자료를 함께 확인하세요.
     </article>
 
     <article v-if="activeContext" class="chat-runtime-context">
@@ -181,7 +146,7 @@ onMounted(() => {
           </ol>
         </details>
       </div>
-      <p v-if="loading" class="loading-text">문서를 검색하고 답변을 생성하고 있습니다.</p>
+      <p v-if="loading" class="loading-text">답변을 요청하고 있습니다.</p>
       <p v-if="errorMessage" class="inline-error">{{ errorMessage }}</p>
     </article>
 

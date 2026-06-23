@@ -34,7 +34,7 @@ export const router = createRouter({
       path: '/chat',
       name: 'chat',
       component: () => import('@/views/ChatView.vue'),
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: true, roles: ['USER', 'ADMIN'] }
     },
     {
       path: '/notices',

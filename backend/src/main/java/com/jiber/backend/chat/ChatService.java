@@ -41,7 +41,7 @@ public class ChatService {
     public ChatResponse ask(ChatRequest request) {
         var retrieval = modelServerChatClient.retrieve(request);
         var answer = generateAnswer(request, retrieval.contexts());
-        return new ChatResponse(answer, retrieval.contexts(), chatModel, retrieval.ragConfig());
+        return new ChatResponse(true, answer, retrieval.contexts(), chatModel, retrieval.ragConfig());
     }
 
     private String generateAnswer(ChatRequest request, List<ChatContextResponse> contexts) {

@@ -15,7 +15,7 @@ import org.springframework.web.client.RestClientException;
 @Component
 public class ModelServerChatClient {
 
-    private static final String CHAT_PATH = "/internal/v1/chat/real-estate";
+    private static final String RETRIEVE_PATH = "/internal/v1/chat/real-estate/retrieve";
 
     private final RestClient restClient;
     private final String internalToken;
@@ -35,16 +35,16 @@ public class ModelServerChatClient {
         this.internalToken = internalToken == null ? "" : internalToken.trim();
     }
 
-    public ChatResponse ask(ChatRequest request) {
+    public ChatRetrievalResponse retrieve(ChatRequest request) {
         try {
             var spec = restClient.post()
-                    .uri(CHAT_PATH)
+                    .uri(RETRIEVE_PATH)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(request);
             if (StringUtils.hasText(internalToken)) {
                 spec = spec.header(HttpHeaders.AUTHORIZATION, "Bearer " + internalToken);
             }
-            var response = spec.retrieve().body(ChatResponse.class);
+            var response = spec.retrieve().body(ChatRetrievalResponse.class);
             if (response == null) {
                 throw new ApiException(ErrorCode.CHATBOT_UNAVAILABLE);
             }

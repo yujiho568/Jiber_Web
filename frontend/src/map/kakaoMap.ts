@@ -38,21 +38,54 @@ export interface KakaoMarkerLike {
   setMap(map: KakaoMapLike | null): void
 }
 
+export interface KakaoOverlayLike {
+  setMap(map: KakaoMapLike | null): void
+}
+
+export interface KakaoTransactionMarkerLike extends KakaoMarkerLike {
+  recentTransactionCount?: number
+}
+
+export interface KakaoClusterLike {
+  getMarkers(): KakaoTransactionMarkerLike[]
+  getClusterMarker(): {
+    setContent(content: string): void
+  }
+}
+
+export interface KakaoMarkerClustererLike {
+  addMarkers(markers: KakaoMarkerLike[]): void
+  clear(): void
+  setMap?(map: KakaoMapLike | null): void
+}
+
 export interface KakaoMapsApi {
   LatLng: new (lat: number, lng: number) => unknown
   Map: new (container: HTMLElement, options: { center: unknown; level: number }) => KakaoMapLike
   Marker: new (options: {
-    map: KakaoMapLike
+    map?: KakaoMapLike
     position: unknown
     title: string
     image?: unknown
     clickable?: boolean
   }) => KakaoMarkerLike
+  MarkerClusterer?: new (options: {
+    map: KakaoMapLike
+    averageCenter: boolean
+    minLevel: number
+    gridSize: number
+  }) => KakaoMarkerClustererLike
+  CustomOverlay?: new (options: {
+    map: KakaoMapLike
+    position: unknown
+    content: string
+    yAnchor?: number
+  }) => KakaoOverlayLike
   MarkerImage?: new (src: string, size: unknown, options?: { offset?: unknown }) => unknown
   Size?: new (width: number, height: number) => unknown
   Point?: new (x: number, y: number) => unknown
   event: {
-    addListener(target: unknown, eventName: string, handler: () => void): void
+    addListener(target: unknown, eventName: string, handler: (...args: unknown[]) => void): void
   }
 }
 
@@ -92,6 +125,15 @@ export function clearMarkers(markers: KakaoMarkerLike[]) {
   markers.forEach((marker) => marker.setMap(null))
 }
 
+export function clearOverlayMarkers(overlays: KakaoOverlayLike[]) {
+  overlays.forEach((overlay) => overlay.setMap(null))
+}
+
+export function clearKakaoTransactionClusterer(clusterer: KakaoMarkerClustererLike | null) {
+  clusterer?.clear()
+  clusterer?.setMap?.(null)
+}
+
 export function mapMarkerRenderMode(zoomLevel: number): MapMarkerRenderMode {
   if (zoomLevel <= 3) {
     return {
@@ -119,6 +161,41 @@ export function formatAdministrativeClusterLabel(cluster: AdministrativeCluster)
       : '평균 정보 없음'
 
   return `${cluster.label}\n${averageLabel}\n거래 ${cluster.transactionCount.toLocaleString('ko-KR')}건`
+}
+
+function transactionClusterBadgeContent(count: number): string {
+  return `<div class="map-transaction-cluster">거래 ${count.toLocaleString('ko-KR')}건</div>`
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => {
+    switch (character) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      case "'":
+        return '&#39;'
+      default:
+        return character
+    }
+  })
+}
+
+function administrativeClusterContent(cluster: AdministrativeCluster): string {
+  const [areaLabel, averageLabel, countLabel] = formatAdministrativeClusterLabel(cluster).split('\n')
+
+  return [
+    `<div class="map-admin-cluster" data-cluster-id="${escapeHtml(cluster.clusterId)}">`,
+    `<strong>${escapeHtml(areaLabel)}</strong>`,
+    `<span>${escapeHtml(averageLabel)}</span>`,
+    `<span>${escapeHtml(countLabel)}</span>`,
+    '</div>'
+  ].join('')
 }
 
 function markerSvg(fill: string, stroke: string): string {
@@ -162,4 +239,79 @@ export function syncKakaoMarkers(options: {
 
     return marker
   })
+}
+
+export function syncKakaoTransactionClusters(options: {
+  kakaoMaps: KakaoMapsApi
+  map: KakaoMapLike
+  previousClusterer: KakaoMarkerClustererLike | null
+  items: PropertyMapItem[]
+}): KakaoMarkerClustererLike | null {
+  clearKakaoTransactionClusterer(options.previousClusterer)
+
+  if (!options.kakaoMaps.MarkerClusterer) {
+    return null
+  }
+
+  const markers = options.items.map((item) => {
+    const marker = new options.kakaoMaps.Marker({
+      position: new options.kakaoMaps.LatLng(item.lat, item.lng),
+      title: `property-cluster-${item.propertyId}`
+    }) as KakaoTransactionMarkerLike
+
+    marker.recentTransactionCount = item.recentTransactionCount ?? 0
+
+    return marker
+  })
+
+  const clusterer = new options.kakaoMaps.MarkerClusterer({
+    map: options.map,
+    averageCenter: true,
+    minLevel: 4,
+    gridSize: 80
+  })
+
+  clusterer.addMarkers(markers)
+
+  options.kakaoMaps.event.addListener(clusterer, 'clustered', (clusters: unknown) => {
+    if (!Array.isArray(clusters)) {
+      return
+    }
+
+    clusters.forEach((cluster) => {
+      const kakaoCluster = cluster as KakaoClusterLike
+      const transactionCount = kakaoCluster
+        .getMarkers()
+        .reduce((total, marker) => total + (marker.recentTransactionCount ?? 0), 0)
+
+      kakaoCluster.getClusterMarker().setContent(transactionClusterBadgeContent(transactionCount))
+    })
+  })
+
+  return clusterer
+}
+
+export function syncAdministrativeClusterOverlays(options: {
+  kakaoMaps: KakaoMapsApi
+  map: KakaoMapLike
+  previousOverlays: KakaoOverlayLike[]
+  clusters: AdministrativeCluster[]
+}): KakaoOverlayLike[] {
+  clearOverlayMarkers(options.previousOverlays)
+
+  if (!options.kakaoMaps.CustomOverlay) {
+    return []
+  }
+
+  const CustomOverlay = options.kakaoMaps.CustomOverlay
+
+  return options.clusters.map(
+    (cluster) =>
+      new CustomOverlay({
+        map: options.map,
+        position: new options.kakaoMaps.LatLng(cluster.centerLat, cluster.centerLng),
+        content: administrativeClusterContent(cluster),
+        yAnchor: 0.5
+      })
+  )
 }

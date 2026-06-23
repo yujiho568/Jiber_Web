@@ -26,3 +26,8 @@ class RealEstateChatResponse(BaseModel):
     contexts: list[ChatContext]
     model: str
     ragConfig: RagConfig
+
+
+class RealEstateChatRetrievalResponse(BaseModel):
+    contexts: list[ChatContext]
+    ragConfig: RagConfig

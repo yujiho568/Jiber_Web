@@ -7,7 +7,11 @@ from app.schemas.apartment import (
     ShapResponse,
     ValuationResponse,
 )
-from app.schemas.chat import RealEstateChatRequest, RealEstateChatResponse
+from app.schemas.chat import (
+    RealEstateChatRequest,
+    RealEstateChatResponse,
+    RealEstateChatRetrievalResponse,
+)
 from app.rag.chat_service import get_rag_chat_service
 from app.services.valuation_service import ApartmentValuationService
 
@@ -51,3 +55,13 @@ def explain_apartment(request: ApartmentInferenceRequest) -> ShapResponse:
 )
 def chat_real_estate(request: RealEstateChatRequest) -> RealEstateChatResponse:
     return get_rag_chat_service().answer(request.question, request.runtimeContext)
+
+
+@router.post(
+    "/chat/real-estate/retrieve",
+    response_model=RealEstateChatRetrievalResponse,
+)
+def retrieve_real_estate_chat_contexts(
+    request: RealEstateChatRequest,
+) -> RealEstateChatRetrievalResponse:
+    return get_rag_chat_service().retrieve(request.question, request.runtimeContext)

@@ -6,6 +6,7 @@ import { favoritesApi } from '@/api/favorites'
 import { getApiError } from '@/api/client'
 import { propertyApi } from '@/api/property'
 import type {
+  AdministrativeCluster,
   FavoriteAreaCreateRequest,
   PropertyMapItem,
   PropertySearchItem,
@@ -30,6 +31,7 @@ const zoomLevel = ref(SEOUL_SEED_VIEWPORT.zoomLevel)
 const loading = ref(false)
 const errorMessage = ref('')
 const items = ref<PropertyMapItem[]>([])
+const administrativeClusters = ref<AdministrativeCluster[]>([])
 const currentViewport = ref<MapViewport>({ ...SEOUL_SEED_VIEWPORT })
 const selectedPropertyId = ref<number | null>(null)
 const searchKeyword = ref('')
@@ -244,11 +246,13 @@ async function searchVisibleArea(viewport: MapViewport = currentViewport.value) 
       transactionTypes: selectedTransactionTypes.value
     })
     items.value = response.items
+    administrativeClusters.value = response.administrativeClusters ?? []
     if (!response.items.some((item) => item.propertyId === selectedPropertyId.value)) {
       selectedPropertyId.value = null
     }
   } catch {
     items.value = []
+    administrativeClusters.value = []
     errorMessage.value = '현재 지도 범위의 실거래 정보를 불러오지 못했습니다. 백엔드 서버 상태를 확인해 주세요.'
   } finally {
     loading.value = false
@@ -259,6 +263,7 @@ async function searchByKeyword(keyword: string) {
   loading.value = true
   errorMessage.value = ''
   activeSearchKeyword.value = keyword
+  administrativeClusters.value = []
 
   try {
     const response = await propertyApi.searchProperties({
@@ -273,6 +278,7 @@ async function searchByKeyword(keyword: string) {
     focusFirstResult(nextItems)
   } catch {
     items.value = []
+    administrativeClusters.value = []
     selectedPropertyId.value = null
     mapFocusTarget.value = null
     errorMessage.value = '검색 결과를 불러오지 못했습니다. 검색어를 확인하거나 잠시 후 다시 시도해 주세요.'
@@ -440,6 +446,7 @@ onBeforeUnmount(() => {
     <div class="map-workspace">
       <KakaoMapPanel
         :items="items"
+        :administrative-clusters="administrativeClusters"
         :selected-property-id="selectedPropertyId"
         :focus-target="mapFocusTarget"
         :focus-zoom-level="zoomLevel"

@@ -3,7 +3,15 @@ import { createPinia, setActivePinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { PagedResponse, PropertyDetail, PropertyMapItem, PropertySearchItem } from '@/api/types'
+import type {
+  AdministrativeCluster,
+  PagedResponse,
+  PropertyDetail,
+  PropertyMapItem,
+  PropertyMapResponse,
+  PropertySearchItem
+} from '@/api/types'
+import KakaoMapPanel from '@/components/KakaoMapPanel.vue'
 import { useAuthStore } from '@/stores/auth'
 import MapView from '@/views/MapView.vue'
 import PropertyDetailView from '@/views/PropertyDetailView.vue'
@@ -58,9 +66,10 @@ vi.mock('@/map/kakaoLoader', () => ({
   getKakaoMapFallbackMessage: kakaoLoaderMock.getKakaoMapFallbackMessage
 }))
 
-function mapResponse(items: PropertyMapItem[]) {
+function mapResponse(items: PropertyMapItem[], administrativeClusters: AdministrativeCluster[] = []): PropertyMapResponse {
   return {
     items,
+    administrativeClusters,
     bounds: {
       swLat: 37.48,
       swLng: 127.01,
@@ -100,7 +109,22 @@ const seedMapItem: PropertyMapItem = {
     dealDate: '2026-05-20'
   },
   dealCount: 18,
+  recentTransactionCount: 4,
   aiAvailable: true
+}
+
+const seedAdministrativeCluster: AdministrativeCluster = {
+  clusterId: 'legal-dong-1168010100',
+  level: 'LEGAL_DONG',
+  sido: 'Seoul',
+  sigungu: 'Gangnam-gu',
+  legalDong: 'Yeoksam-dong',
+  label: 'Yeoksam-dong',
+  centerLat: 37.5008,
+  centerLng: 127.0366,
+  propertyCount: 12,
+  transactionCount: 34,
+  averageDealAmount: 1230000000
 }
 
 const importedSearchItem: PropertySearchItem = {
@@ -268,6 +292,34 @@ beforeEach(() => {
 })
 
 describe('MapView keyword search', () => {
+  it('passes administrative clusters from map search to KakaoMapPanel and clears them for keyword search', async () => {
+    propertyApiMock.getMapProperties.mockResolvedValueOnce(mapResponse([seedMapItem], [seedAdministrativeCluster]))
+    propertyApiMock.searchProperties.mockResolvedValueOnce(searchResponse([importedSearchItem]))
+    const { wrapper } = await mountMapView()
+
+    expect(wrapper.findComponent(KakaoMapPanel).props('administrativeClusters')).toEqual([seedAdministrativeCluster])
+
+    await wrapper.get('[data-test="map-search-keyword"]').setValue('keyword')
+    await wrapper.get('[data-test="map-search-form"]').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.findComponent(KakaoMapPanel).props('administrativeClusters')).toEqual([])
+  })
+
+  it('clears administrative clusters when map bounds search fails', async () => {
+    propertyApiMock.getMapProperties
+      .mockResolvedValueOnce(mapResponse([seedMapItem], [seedAdministrativeCluster]))
+      .mockRejectedValueOnce(new Error('map failed'))
+    const { wrapper } = await mountMapView()
+
+    expect(wrapper.findComponent(KakaoMapPanel).props('administrativeClusters')).toEqual([seedAdministrativeCluster])
+
+    wrapper.findComponent(KakaoMapPanel).vm.$emit('loadError')
+    await flushPromises()
+
+    expect(wrapper.findComponent(KakaoMapPanel).props('administrativeClusters')).toEqual([])
+  })
+
   it('renders a Korean keyword search input', async () => {
     const { wrapper } = await mountMapView()
 

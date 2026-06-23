@@ -1,0 +1,1892 @@
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S3NS9NWTLZ"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-S3NS9NWTLZ');
+</script>
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta property="og:image" content="/img/portal/og_kakao.png?v=01062615"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>부동산테크</title>
+
+<script src="/css/land/assets/dist/js/bootstrap.bundle.min.js"></script>
+<link href="/css/land/assets/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/land/default.css?v=01062615">
+<link rel="stylesheet" href="/css/land/common.css?v=01062615">
+<link rel="stylesheet" href="/css/land/layout.css?v=01062615">
+<link rel="stylesheet" href="/css/portal/contents.css?v=01062615">
+
+    
+    
+        <link rel="stylesheet" href="/css/land/map.css?v=01062615">
+    
+
+<link rel="stylesheet" href="/css/land/mobile.css?v=01062615">
+
+<script language="javascript" src="/js/assets/jquery/jquery-3.7.1.min.js"></script>
+
+<script language="javascript" src="/js/lodash.min.js"></script>
+<script language="javascript" src="/js/jquery.showLoading.js"></script>
+<script language="javascript" src="/js/json2.js"></script>
+
+<script language="javascript" src="/js/dateUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/portal/common/tblManger.js"></script>
+<script language="javascript" src="/js/stringUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/calendar.js?v=01062615"></script>
+
+<script language="javascript" src="/js/bPopup.js"></script>
+<script language="javascript" src="/js/inputMng.js"></script>
+<!-- Load jQuery Here -->
+<!--[if lt IE 7]>
+<script  language="javascript" src="/js/IE9.js"></script>
+<script  language="javascript" src="/js/ie7-squish.js"></script>
+<script  language="javascript" src="/js/PIE.js"></script>
+<script  language="javascript" src="/js/html5.js"></script>
+<![endif]-->
+<script language="javascript" src="/js/geocent.js"></script>
+<script language="javascript" src="/js/cscs.js"></script>
+<script language="javascript" src="/js/tmerc.js"></script>
+<script language="javascript" src="/js/KOREA_CENTER_TM_3param.js"></script>
+<script language="javascript" src="/js/rSlider.min.js"></script>
+<script language="javascript" src="/js/assets/jquery/jquery-ui.js?v=01062615"></script>
+<script language="javascript" src="/js/cookie.js"></script>
+
+<script language="javascript" src="/js/assets/axios/axios.min.js"></script>
+
+<script>
+    var glb_ctxPathJS = "";
+</script>
+<script language="javascript" src="/js/portal/common/common.js?v=01062615"></script>
+
+<script language="javascript" src="/js/common/common.js?v=01062615"></script>
+<script language="javascript" src="/js/common/commonStrUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/common/commonHelpUtil.js?v=01062615"></script>
+
+    <link rel="stylesheet" href="/css/portal/main.css?v=01062615">
+</head>
+<body>
+
+<!-- gnb -->
+<header>
+    
+
+
+
+<div class="headerDiv" id="sect-gnb">
+    <div class="top_aside">
+        <ul>
+            <li class="on"><a href="https://www.reb.or.kr/reb/main.do" target="_blank">한국부동산원</a></li>
+            <li><a href="https://www.reb.or.kr/r-one/" target="_blank">부동산통계</a></li>
+            
+        </ul>
+        <div class="zoom">
+            <span>글자크기</span>
+            <button class="zoom_in" onclick="glbDisplayZoom.zoomOut();"></button>
+            <button class="zoom_out" onclick="glbDisplayZoom.zoomIn();"></button>
+        </div>
+    </div>
+
+
+    <div class="gnb_wrap">
+        <h1 onclick="location.href='/portal/main/indexPage.do';">
+            <a href="javascript:;">부동산테크</a>
+        </h1>
+        <div class="gnb_menu">
+            <ul class="top-menu">
+                
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/land/landMap.do" class="menu" title="부동산시세">부동산시세</a>
+
+                        
+                        
+
+                        
+                        
+                        </li>
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/analytics/analReprot.do" class="menu" title="부동산 분석">부동산 분석</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/analytics/analReprot.do" title="부동산 분석리포트">부동산 분석리포트</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/info/landInfo.do" class="menu" title="부동산 정보">부동산 정보</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/landInfo.do" title="부동산 뉴스">부동산 뉴스</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                            <a href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank" class="openurl" title="보도자료">보도자료</a>
+                                        
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/bodLbry.do" title="자료실">자료실</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/rental/rentalMarket.do" class="menu" title="임대시장 사이렌">임대시장 사이렌</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/rental/rentalMarket.do" title="임대시장 현황">임대시장 현황</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/intro/intro.do" class="menu" title="소개">소개</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/intro.do" title="소개">소개</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/bodFaq.do" title="자주묻는질문">자주묻는질문</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                
+                </li>
+            </ul>
+        </div>
+        <div class="mobile_aside m_block">
+            <a href="" class="search" id="totalSearchBtn">검색</a>
+            <a href="javascript:;" class="sitemap" id="totalmenuBtn" onclick="glbMobileMenu.show();">전체메뉴</a>
+        </div>
+    </div>
+
+    <!-- 모바일 전체메뉴 :S-->
+    <div class="totalmenu_mobile" style="display: none">
+        <div class="totalmenu-wrapper-mobile">
+            <div class="title">
+                <p class="mobile-title">전체메뉴</p>
+                <button class="btn_closed" id="totalmenu_close">닫기</button>
+            </div>
+            <div class="totalmenu-area-mobile">
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                
+                                    <a href="/land/landMap.do" class="" title="부동산시세">부동산시세</a>
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">부동산 분석<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/analytics/analReprot.do" class="" title="부동산 분석리포트">부동산 분석리포트</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">부동산 정보<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/info/landInfo.do" class="" title="부동산 뉴스">부동산 뉴스</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                            <a href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank" class="openurl" title="보도자료">보도자료</a>
+                                        
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/bodLbry.do" class="" title="자료실">자료실</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">임대시장 사이렌<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/rental/rentalMarket.do" class="" title="임대시장 현황">임대시장 현황</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">소개<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/intro/intro.do" class="" title="소개">소개</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/bodFaq.do" class="" title="자주묻는질문">자주묻는질문</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                
+            </div>
+            
+        </div>
+    </div>
+    <!-- //모바일 전체메뉴 :e-->
+
+</div>
+</header>
+<!-- //gnb -->
+
+<!-- popup -->
+
+
+
+
+
+
+    
+    
+        
+        
+        
+        
+        
+        
+        
+    
+
+    
+    
+
+    
+    
+
+
+
+
+
+    <div class="popup_okti" id="popup_event_sect" style="display:none;">
+        <div>
+
+            
+            
+                <div class="pop_closed">
+                    <a href="javascript:;" onclick="javascript:app.Pop.eventLayerPop.closeLayerPop();">창닫기</a>
+                </div>
+            
+            
+
+            
+            
+            
+
+            
+            <ul id="popup_event_sect__ul" style="margin-bottom: 0px;">
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                             
+                                                 /file/Safe_Jeonse_Contract_Checklist.pdf
+                                            
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   
+                                   download="안심 전세계약 체크리스트"
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=115&fileName=ff212294-3dc2-45a0-a532-682ed76b2602.png" data-seqce-no="14" alt="KakaoTalk_20251224_095954442_01.png" class="post-image-banner"
+                                         data-fallback-src="/img/new_reb_pop.jpg" data-slider-id="popup_event_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+            </ul>
+            
+
+            
+            
+                <div class="foot_pop" id="popup_event_sect__footer">
+                    <div class="left-section">
+                        <div class="dots-container"></div>
+                        
+                    </div>
+                    <div class="today">
+                        <input type="checkbox" id="oktee">
+                        <label for="oktee">오늘 하루 이창을 열지 않음</label>
+                    </div>
+                </div>
+            
+            
+
+        </div>
+    </div>
+
+<!-- //popup -->
+
+<!-- 부동산테크 -->
+<div class="rtech_visual">
+    <div class="rtech_head">
+        <div class="rtech_head_left">
+            <div>
+                <strong>부동산 서비스의 변함없는 기준</strong>
+                <span>부동산테크</span>
+            </div>
+
+            <div class="rtech_head_sec">
+                <select id="cbo__keyword_type" title="주택 선택">
+                    <option value="AO">공동주택+오피스텔</option>
+                    <option value="SM">소규모단지</option>
+                </select>
+                <div class="rtech_head_search">
+                    <input type="text" id="txt__keyword_result" placeholder="주소 및 단지명을 입력해 주세요" aria-label="주소 및 단지명 검색" title="주소 및 단지명 검색">
+                    <button type="button" id="btn__keyword_result">검색</button>
+                </div>
+            </div>
+
+
+
+
+
+
+            <!-- 시구군 선택 :S-->
+            <div class="Quick_region_div" id="sect__region_keyword">
+                <ul>
+                    <li onclick="$('#sect__region_keyword__do').show();">
+                        <button id="btn__region_keyword__do">시/도 선택</button>
+                        <div class="region_select" id="sect__region_keyword__do" style="display: none;">
+                            <div class="title">
+                                <span>시/도</span>
+                                <button onclick="$('#sect__region_keyword__do').hide();">닫기</button>
+                            </div>
+                            <div class="scolling">
+                                <ul id="cbo__region_keyword__do"></ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li onclick="$('#sect__region_keyword__gu').show();">
+                        <button id="btn__region_keyword__gu" >시/군 선택</button>
+                        <div class="region_select" id="sect__region_keyword__gu" style="display: none;">
+                            <div class="title">
+                                <span>군/구</span>
+                                <button onclick="$('#sect__region_keyword__gu').hide();">닫기</button>
+                            </div>
+                            <div class="scolling">
+                                <ul id="cbo__region_keyword__gu">
+                                    <li><a href="javascript:;" value="">전체선택</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li onclick="$('#sect__region_keyword__dong').show();">
+                        <button id="btn__region_keyword__dong">동 선택</button>
+                        <div class="region_select" id="sect__region_keyword__dong" style="display: none;">
+                            <div class="title">
+                                <span>동</span>
+                                <button onclick="$('#sect__region_keyword__dong').hide();">닫기</button>
+                            </div>
+                            <div class="scolling">
+                                <ul id="cbo__region_keyword__dong">
+                                    <li><a href="javascript:;" value="">전체선택</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- //시구군 선택 :E-->
+
+            <div class="rtech_head_result" id="div__keyword_result" style="display: none;">
+                <div class="total_num">총 <span>0</span>건이 검색되었습니다.</div>
+                <ul></ul>
+                <a href="javascript: $('#div__keyword_result, #sect__region_keyword').hide();" id="btn__keyword_result_close">닫기</a>
+            </div>
+
+        </div>
+        <div class="rtech_head_right">
+            <div>
+                <strong>제공 단지수</strong>
+                <span>
+                    <i>24,197</i>
+                    
+                </span>
+            </div>
+            <div>
+                <strong>제공 호수</strong>
+                <span>
+                    <i>10,262,712</i>
+                    
+                </span>
+            </div>
+            <div class="bu_sise">
+                <a href="/land/landMap.do" target="_blank" title="부동산시세 찾기">부동산시세 찾기</a>
+            </div>
+            <ul>
+                <li>기준일 : <span id="aptpDate"></span></li>
+                <li>해당 기준일에 부동산테크에서 공개하고 있는 공동주택 단지 수/호(세대) 수로 기준일에 따라 수치가 변동될 수 있습니다.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- //부동산테크 -->
+
+<div class="rtech_cont">
+    <!-- 지역 분석(공동주택) -->
+    <div class="rtech_cont_inner">
+        <h2>지역 분석(공동주택)<button class="info_pop_btn"  onclick ="detailPop(1)"></button></h2>
+        <div class="rtech_ipt">
+            <div class="rtech_box">
+                <div>
+                    <select id="cbo__do_list" title="시/도 선택" aria-label="시/도 선택"></select>
+                    <select id="cbo__sigungu_list" title="시/군/구 선택" aria-label="시/군/구 선택"></select>
+                    <select id="cbo__dong_list" title="동 선택" aria-label="동 선택"></select>
+                    <button type="button" id="btn__area_price">검색</button>
+                </div>
+            </div>
+            <div class="rtech_box" id="div__chart_area_type">
+                <div>
+                    <ul>
+                        <li>
+                            <a href="javascript:;" class="on" data-type="areaPerPrice">3.3㎡ 당 시세</a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" data-type="avgPrice">평균시세</a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" data-type="actTran">실거래량</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="rtech_box">
+                <div class="rtech_box_chart" id="div__chart_area_price_month">
+                    <div class="loading-spinner"></div>
+                    <h3>월별 평균시세(개포동) <button class="info_pop_btn"></button></h3>
+                    <div class="rtech_chart" id="chart__monthly_price"></div>
+                </div>
+            </div>
+            <div class="rtech_box">
+                <div class="rtech_box_chart" id="div__chart_area_price_year">
+                    <div class="loading-spinner"></div>
+                    <h3>연도별 평균시세(개포동) <button class="info_pop_btn"></button></h3>
+                    <div class="rtech_chart" id="chart__year_price"></div>
+                </div>
+            </div>
+        </div>
+        <div class="btech_txt">부동산테크에서 공개하고 있는 공동주택 시세 및 국토교통부 공개용 실거래를 활용한 통계자료입니다.</div>
+    </div>
+</div>
+<!-- //지역 분석(공동주택) -->
+
+<!-- 기타 링크 -->
+<div class="rtech_link">
+    <div>
+        <a href="/portal/analytics/analReprot.do">
+            <div>
+                <strong>부동산 분석</strong>
+                <span>우리동네 TOP10은?<br> 우리지역 가격수준과 변동추이</span>
+            </div>
+        </a>
+        <a href="/portal/rental/rentalMarket.do">
+            <div>
+                <strong>임대시장 현황</strong>
+                <span>전세정보 확인하고<br>보증금 피해 예방하세요</span>
+            </div>
+        </a>
+    </div>
+    <ul>
+        <li>
+            <a href="/portal/intro/bodFaq.do">FAQ<br> 자주 묻는 질문</a>
+        </li>
+        <li>
+            <a href="/land/landMap.do?agencyPopYn=Y" title="우리동네 공인중개사">우리동네<br> 공인중개사</a>
+        </li>
+        <li>
+            <a href="https://rms.reb.or.kr/main/rmsLogin.do" target="_blank" title="새창열림">협력공인중개사<br> 모니터링 시스템</a>
+        </li>
+    </ul>
+</div>
+<!-- //기타 링크 -->
+
+<!-- 시세, 오늘의 늬우스 -->
+<div class="rtech_news">
+    <!-- 시세 뉴스 -->
+    <div class="rtech_news_sise">
+        <h2>조회수 TOP 20</h2>
+        <div class="rtech_sel">
+            <select id="cbo__news_do_list" aria-label="시세 뉴스" title="시세 뉴스"></select>
+            <div class="rtech_play">
+                <button id="btn__slick_sise_play">시작</button>
+                
+            </div>
+        </div>
+        <div class="rtech_news_box" id="div__sise_news_sect"></div>
+        <div class="rtech_news_btn">
+            <button class="btn_ prev" id="btn__sise_news_prev"></button>
+            <button class="btn_ next" id="btn__sise_news_next"></button>
+        </div>
+    </div>
+    <!-- //시세 뉴스 -->
+
+    <!-- 오늘의 뉴스 -->
+    <div class="rtech_news_today">
+        <h2>오늘의 뉴스</h2>
+        <div class="rtech_today_list" id="div__today_news_sect"></div>
+        <a href="/portal/info/landInfo.do" class="btn_more_all">더보기</a>
+    </div>
+    <!-- //오늘의 뉴스 -->
+</div>
+<!-- //시세, 오늘의 늬우스 -->
+
+<!-- 지역별 아파트 분석 설명 -->
+<div id ="layer_popup1" style="display: none" class="layer_popup">
+    <div class="popup_div" style="width: 500px">
+        <!-- 헤더 -->
+        <div class="top_header">
+            <h2 class="">지역 분석(공동주택)설명</h2>
+            <a href="javascript:void(0)" onclick="popClose(1);" class="closed">닫기</a>
+        </div>
+
+        <!-- 본문 -->
+        <div class="content_pop">
+            <div class="rentalMarket">
+                <dl>
+                    <dt>부동산테크에서 공개하고 있는 공동주택 시세 및 국토교통부 공개용 실거래를 활용한 통계자료입니다.</dt>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 시세별 설명 -->
+<div id ="layer_popup2" style="display: none" class="layer_popup">
+    <div class="popup_div" style="width: 500px">
+        <!-- 헤더 -->
+        <div class="top_header">
+            <h2 class="siseMonDescTitle"></h2>
+            <a href="javascript:void(0)" onclick="popClose(2);" class="closed">닫기</a>
+        </div>
+
+        <!-- 본문 -->
+        <div class="content_pop">
+            <div class="rentalMarket">
+                <dl class="siseMonDescText">
+
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 시세별 설명 -->
+<div id ="layer_popup3" style="display: none" class="layer_popup">
+    <div class="popup_div" style="width: 500px">
+        <!-- 헤더 -->
+        <div class="top_header">
+            <h2 class="siseYearDescTitle"></h2>
+            <a href="javascript:void(0)" onclick="popClose(3);" class="closed">닫기</a>
+        </div>
+
+        <!-- 본문 -->
+        <div class="content_pop">
+            <div class="rentalMarket">
+                <dl class="siseYearDescText">
+
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 메인 banner -->
+
+
+
+
+
+
+    
+    
+
+    
+    
+        
+        
+        
+        
+        
+    
+
+    
+    
+
+
+
+
+
+    <div class="main_banner" id="banner_sect" style="">
+        <div>
+
+            
+            
+            
+
+            
+            
+                <div class="arrowbtn">
+                    <a href="javascript:;" class="left_arrow">left</a>
+                    <a href="javascript:;" class="right_arrow">right</a>
+                </div>
+            
+            
+
+            
+            <ul id="banner_sect__ul" style="">
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/reb/main.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=82&fileName=5be6d608-4dad-4d47-8b3f-c0858c9def46.png" data-seqce-no="3" alt="banner01_pc.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/r-one/portal/main/indexPage.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=116&fileName=6e514346-a2c4-410b-ab34-2abec8da25f0.png" data-seqce-no="4" alt="KakaoTalk_20251224_102158337.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.budongsan24.kr/
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=84&fileName=3b828066-a038-43e0-ae61-2c22c105b12f.png" data-seqce-no="5" alt="banner02_pc.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.applyhome.co.kr/co/coa/selectMainView.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=86&fileName=9b5cd0a6-24ff-4440-8a1f-2df61e4dc87f.png" data-seqce-no="6" alt="banner03_pc.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://play.google.com/store/apps/details?id=kr.co.kba
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=88&fileName=90359763-ea21-485c-862e-a915eb8e6dcc.png" data-seqce-no="7" alt="banner04_pc.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/reb/main.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=89&fileName=bc882fcd-0cf7-4cb3-9f62-18939b53953d.png" data-seqce-no="8" alt="banner05_pc.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/reb/main.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=90&fileName=f3665f12-65ef-479a-b79d-0cef7d29a057.png" data-seqce-no="9" alt="배너7.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.budongsan24.kr/
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=91&fileName=e2eafcff-3103-4d33-a1e1-72b18c6b3db9.png" data-seqce-no="10" alt="배너8.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                             
+                                                 /file/Safe_Jeonse_Contract_Checklist.pdf
+                                            
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   
+                                   download="안심 전세계약 체크리스트"
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=92&fileName=544fc847-abb5-4e9d-91f8-b1a7bc3f7c1c.png" data-seqce-no="11" alt="배너9.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://cleanbudongsan.go.kr/bbs/cardNewsList.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=93&fileName=6ab6b741-bbb5-4236-af7d-b28c490dd2ce.png" data-seqce-no="12" alt="배너10.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner.png" data-slider-id="banner_sect__ul"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+            </ul>
+            
+
+            
+            
+            
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+        
+        
+        
+        
+        
+    
+
+
+
+
+
+    <div class="main_banner_mobile" id="banner_sect_mobile" style="">
+        <div>
+
+            
+            
+            
+
+            
+            
+                <div class="arrowbtn">
+                    <a href="javascript:;" class="left_arrow">left</a>
+                    <a href="javascript:;" class="right_arrow">right</a>
+                </div>
+            
+            
+
+            
+            <ul id="banner_sect__ul_mobile" style="">
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/reb/main.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=82&fileName=fc2f95c7-c7ca-474e-a6f4-d43fd5ce1100.png" data-seqce-no="3" alt="banner01_mobile.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/r-one/portal/main/indexPage.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=116&fileName=87c23016-4152-43d9-a048-1ac90cf0f005.png" data-seqce-no="4" alt="KakaoTalk_20251224_102158337_01.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.budongsan24.kr/
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=84&fileName=d14e1233-3c6e-4cf8-bc72-aa7c95f3f71b.png" data-seqce-no="5" alt="banner02_mobile.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.applyhome.co.kr/co/coa/selectMainView.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=86&fileName=435c3a77-7419-4572-b177-3c28957abcd6.png" data-seqce-no="6" alt="banner03_mobile.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://play.google.com/store/apps/details?id=kr.co.kba
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=88&fileName=c4435bb5-3960-4c6c-9dbf-9c8f276d4041.png" data-seqce-no="7" alt="banner04_mobile.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/reb/main.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=89&fileName=5f43b776-aef7-4d91-ac80-2ea650f88aad.png" data-seqce-no="8" alt="banner05_mobile.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.reb.or.kr/reb/main.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=90&fileName=0d76ae57-d080-4aae-8e1f-f62ad9eb9a9c.png" data-seqce-no="9" alt="배너7_m.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://www.budongsan24.kr/
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=91&fileName=f4352870-026f-4b1c-917a-2ff643367eab.png" data-seqce-no="10" alt="배너8_m.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                             
+                                                 /file/Safe_Jeonse_Contract_Checklist.pdf
+                                            
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   
+                                   download="안심 전세계약 체크리스트"
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=92&fileName=25338184-91ea-4ef6-8a3d-e726b6841b2c.png" data-seqce-no="11" alt="배너9_m.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+                    <li>
+                        
+                            
+                                <a href="
+                                            
+                                             
+                                                 https://cleanbudongsan.go.kr/bbs/cardNewsList.do
+                                             
+                                             
+                                             
+                                         "
+                                   rel="noopener noreferrer" title="새 창 열림"
+                                   target="_blank"
+                                   
+                                >
+                                    <img src="/portal/main/viewImage.do?pstSn=93&fileName=0163f284-6266-4012-a106-6fc27d4ed760.png" data-seqce-no="12" alt="배너10_m.png" class="post-image-banner"
+                                         data-fallback-src="/img/main/main_banner_mobile.png" data-slider-id="banner_sect__ul_mobile"
+                                    />
+                                </a>
+                            
+                            
+                        
+                    </li>
+                
+            </ul>
+            
+
+            
+            
+            
+
+        </div>
+    </div>
+
+<!-- //메인 banner -->
+
+<!-- footer -->
+
+
+
+<!-- 소규모단지 공지 -->
+<div class="layer_popup" id="layer__smallhouse_pop_noti" style="display:none;">
+    <div class="popup_div" style="width: 400px">
+        <div class="content_pop">
+            <div class="pop_info_txt">
+                <dl>
+                    <dt>안내</dt>
+                    <dd>소규모단지 시세는 부동산테크와 별개의 시세로 전세사기 방지를 위한 참고용 시세입니다.</dd>
+                    <dd>모형에 의해 자동 추정된 가격이며 리모델링, 서비스면적, 마감재 등 개별 사항은 반영되지 않습니다.</dd>
+                </dl>
+                <button class="btn btn-outline-primary" onclick="javascript: $('#layer__smallhouse_pop_noti').hide();">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick -->
+<div class="quick_menu">
+    <a href="javascript:void(0);" class="quick_menu_search" id="footer__btn__quick_keyword">
+        <span>빠른검색</span>
+    </a>
+    <dl>
+        <dt>QUICK<br>MENU</dt>
+        <dd>
+            <a href="/land/landMap.do" title="부동산 시세" target="_blank">부동산 시세</a>
+        </dd>
+        <dd>
+            <a href="/portal/analytics/analReprot.do" title="부동산 분석">부동산 분석</a>
+        </dd>
+        <dd>
+            <a href="/land/landMap.do?interestComplexYn=Y" title="관심단지">관심단지</a>
+        </dd>
+    </dl>
+    <a href="#" class="btn_qtop">top</a>
+</div>
+<!-- //Quick -->
+
+<!-- 빠른검색 -->
+<div class="quick_search" id="footer__div__quick_search_sect">
+    <div>
+        <div>
+            <strong>빠른검색</strong>
+            <div class="quick_outer">
+                <select id="footer__cbo__keyword_type">
+                    <option value="AO">공동주택+오피스텔</option>
+                    <option value="SM">소규모단지</option>
+                </select>
+                <div class="quick_form">
+                    <label for="footer__txt__quick_search" class="blind">검색</label>
+                    <input type="text" id="footer__txt__quick_search" title="검색">
+                    <button type="button" id="footer__btn__quick_search">검색</button>
+                </div>
+            </div>
+            <a href="javascript:;" id="footer__btn_search_close">닫기</a>
+
+
+
+
+
+            <div class="quick_search_region">
+                <!-- 시구군 선택 :S-->
+                <div class="ft_Quick_region_div" id="footer__sect__region_keyword" style="display: none;">
+                    <ul>
+                        <li onclick="$('#footer__sect__region_keyword__do').show();">
+                            <button id="footer__btn__region_keyword__do">시/도 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__do" style="display: none;">
+                                <div class="title">
+                                    <span>시/도</span>
+                                    <button onclick="$('#footer__sect__region_keyword__do').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__do"></ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li onclick="$('#footer__sect__region_keyword__gu').show();">
+                            <button id="footer__btn__region_keyword__gu">시/군 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__gu" style="display: none;">
+                                <div class="title">
+                                    <span>군/구</span>
+                                    <button onclick="$('#footer__sect__region_keyword__gu').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__gu">
+                                        <li><a href="javascript:;" value="">전체선택</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li onclick="$('#footer__sect__region_keyword__dong').show();">
+                            <button id="footer__btn__region_keyword__dong">동 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__dong" style="display: none;">
+                                <div class="title">
+                                    <span>동</span>
+                                    <button onclick="$('#footer__sect__region_keyword__dong').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__dong">
+                                        <li><a href="javascript:;" value="">전체선택</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- //시구군 선택 :E-->
+            </div>
+            <div class="quick_result" id="footer__div__quick_search_list" style="display: none;">
+                <div class="total_num">총 <span>0</span>건이 검색되었습니다.</div>
+                <ul></ul>
+                <a href="javascript:;" id="footer__btn_search_list_close">닫기</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- //빠른검색 -->
+<!-- 모바일 퀵메뉴 (S)-->
+<div class="footer_quick_go">
+    <a href="javascript:;" class="btn-quick-go">Quick<br>메뉴</a>
+    <a href="javascript:;" class="btn-top-go" >TOP</a>
+</div>
+<div class="mobile_quickmenu" style="display:none ;">
+    <div class="mobile_quickmenu_box">
+        <div>
+            <strong>Quick 메뉴</strong>
+            <ul>
+                <li><a href="javascript:;" id="quickSearch" title="빠른검색">빠른검색</a></li>
+                <li><a href="/land/landMap.do" target="_blank" title="부동산 시세">부동산 시세</a></li>
+                <li><a href="/portal/analytics/analReprot.do" title="부동산 분석">부동산 분석</a></li>
+                <li><a href="/land/landMap.do?interestComplexYn=Y" title="관심단지">관심단지</a></li>
+            </ul>
+        </div>
+
+    </div>
+    <a href="javascript:;" class="mobile_quick_x">닫기</a>
+</div>
+<!-- // 모바일 퀵메뉴 (E)-->
+<footer>
+    <div>
+        <a href="#" class="footer_logo">REB 부동산테크</a>
+        <div class="footer_menu">
+            <ul>
+                <li>대표번호 : 1644-2828</li>
+                <li><a href="https://www.reb.or.kr/reb/cm/cntnts/cntntsView.do?mi=9975&cntntsId=1291" target="new"
+                       class="f_gaein">개인정보보호정책</a></li>
+                <li><a href="https://www.reb.or.kr/reb/lm/location/locationMapView.do?mi=9699" target="new">찾아오시는 길</a>
+                </li>
+            </ul>
+            <address>
+                대구광역시 동구 이노밸리로 291 [신서동 919-2] 한국부동산원
+            </address>
+            <div>COPYRIGHT ⓒKOREA REAL ESTATE BOARD. <br> ALL RIGHTS RESERVED.</div>
+        </div>
+        <div class="footer_com">
+            <span>자회사 : 알이비파트너스 주식회사</span>
+            <span>대구광역시 동구 이노밸리로 309, 3층 [신서동 1149-2]</span>
+        </div>
+        <div class="footer_site">
+            <label for="footer__cbo_familySite" class="blind">패밀리사이트</label>
+            <select id="footer__cbo_familySite">
+                <option value="">패밀리사이트</option>
+                <option value="https://www.reb.or.kr">한국부동산원</option>
+                <option value="https://www.reb.or.kr/r-one">R-ONE(부동산통계정보시스템)</option>
+                <option value="https://www.applyhome.co.kr">청약홈</option>
+                <option value="https://www.k-apt.go.kr">K-apt(공동주택관리정보시스템)</option>
+            </select>
+            
+        </div>
+    </div>
+
+
+    <div class="footer-search-container hidden" id="footer__quick_map_search" style="position: relative; width: 300px; margin: 20px auto;">
+        <div class="search-input-box" style="display: flex; gap: 5px;">
+            <label for="footer__quick_map__input" class="blind">검색어를 입력하세요.</label>
+            <input type="text" id="footer__quick_map__input" placeholder="검색어를 입력하세요" style="flex: 1; padding: 8px; border: 1px solid #ddd;" title="검색어를 입력하세요.">
+        </div>
+        <div id="footer__quick_map__list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #fff; border: 1px solid #ddd; border-top: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+            <ul style="list-style: none; padding: 0; margin: 0;"></ul>
+        </div>
+    </div>
+
+    <form id="global-hidden-form"></form>
+    <script type="text/javascript" src="/js/portal/main/footer.js"></script>
+
+</footer>
+<!-- //footer -->
+
+<script>
+    $(document).ready(function() {
+        const slider = $('.tab-menu-swipe');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        // 1. 마우스로 끌어서 스크롤하는 기능
+        slider.on('mousedown', function(e) {
+            isDown = true;
+            slider.addClass('active');
+            startX = e.pageX - slider.offset().left;
+            scrollLeft = slider.scrollLeft();
+            e.preventDefault(); // 기본 드래그 동작 방지
+        });
+
+        slider.on('mouseleave mouseup', function() {
+            isDown = false;
+            slider.removeClass('active');
+        });
+
+        slider.on('mousemove', function(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offset().left;
+            const walk = (x - startX) * 2; // *2를 하여 스크롤 속도를 빠르게 조절 가능
+            slider.scrollLeft(scrollLeft - walk);
+        });
+
+        // 2. 항목 클릭 시 가운데로 이동하는 기능
+        $('.tab-menu-swipe ul li').on('click', function(e) {
+            e.preventDefault();
+
+            // 모든 항목에서 'on' 클래스 제거 후 클릭된 항목에만 추가
+            $(this).siblings().removeClass('on');
+            $(this).addClass('on');
+
+            // 클릭된 항목을 가운데로 스크롤
+            var container = $('.tab-menu-swipe');
+            var item = $(this);
+
+            var containerWidth = container.width();
+            var itemWidth = item.outerWidth();
+            var containerScrollLeft = container.scrollLeft();
+            var itemOffsetLeft = item.position().left;
+
+            var newScrollLeft = containerScrollLeft + itemOffsetLeft - (containerWidth / 2) + (itemWidth / 2);
+
+            container.animate({
+                scrollLeft: newScrollLeft
+            }, 300); // 0.3초 동안 부드럽게 이동
+        });
+    });
+</script>
+
+
+</body>
+<link rel="stylesheet" type="text/css" href="/js/assets/slick-carousel/slick.css"/>
+<link rel="stylesheet" type="text/css" href="/js/assets/slick-carousel/slick-theme.css"/>
+<script language="JavaScript" type="text/javascript" src="/js/assets/slick-carousel/slick.min.js"></script>
+<script language="JavaScript" type="text/javascript" src="/js/assets/charts/highcharts.js"></script>
+<script language="JavaScript" type="text/javascript" src="/js/assets/charts/modules/stock.js"></script>
+<script language="JavaScript" type="text/javascript" src="/js/assets/charts/modules/exporting.js"></script>
+<script language="javascript" type="text/javascript" src="/js/portal/main/portalMain.js?v=01062615"></script>
+</html>

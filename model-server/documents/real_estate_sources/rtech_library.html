@@ -1,0 +1,1143 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S3NS9NWTLZ"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-S3NS9NWTLZ');
+</script>
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta property="og:image" content="/img/portal/og_kakao.png?v=01062615"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>부동산테크</title>
+
+<script src="/css/land/assets/dist/js/bootstrap.bundle.min.js"></script>
+<link href="/css/land/assets/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/land/default.css?v=01062615">
+<link rel="stylesheet" href="/css/land/common.css?v=01062615">
+<link rel="stylesheet" href="/css/land/layout.css?v=01062615">
+<link rel="stylesheet" href="/css/portal/contents.css?v=01062615">
+
+    
+    
+        <link rel="stylesheet" href="/css/land/map.css?v=01062615">
+    
+
+<link rel="stylesheet" href="/css/land/mobile.css?v=01062615">
+
+<script language="javascript" src="/js/assets/jquery/jquery-3.7.1.min.js"></script>
+
+<script language="javascript" src="/js/lodash.min.js"></script>
+<script language="javascript" src="/js/jquery.showLoading.js"></script>
+<script language="javascript" src="/js/json2.js"></script>
+
+<script language="javascript" src="/js/dateUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/portal/common/tblManger.js"></script>
+<script language="javascript" src="/js/stringUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/calendar.js?v=01062615"></script>
+
+<script language="javascript" src="/js/bPopup.js"></script>
+<script language="javascript" src="/js/inputMng.js"></script>
+<!-- Load jQuery Here -->
+<!--[if lt IE 7]>
+<script  language="javascript" src="/js/IE9.js"></script>
+<script  language="javascript" src="/js/ie7-squish.js"></script>
+<script  language="javascript" src="/js/PIE.js"></script>
+<script  language="javascript" src="/js/html5.js"></script>
+<![endif]-->
+<script language="javascript" src="/js/geocent.js"></script>
+<script language="javascript" src="/js/cscs.js"></script>
+<script language="javascript" src="/js/tmerc.js"></script>
+<script language="javascript" src="/js/KOREA_CENTER_TM_3param.js"></script>
+<script language="javascript" src="/js/rSlider.min.js"></script>
+<script language="javascript" src="/js/assets/jquery/jquery-ui.js?v=01062615"></script>
+<script language="javascript" src="/js/cookie.js"></script>
+
+<script language="javascript" src="/js/assets/axios/axios.min.js"></script>
+
+<script>
+    var glb_ctxPathJS = "";
+</script>
+<script language="javascript" src="/js/portal/common/common.js?v=01062615"></script>
+
+<script language="javascript" src="/js/common/common.js?v=01062615"></script>
+<script language="javascript" src="/js/common/commonStrUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/common/commonHelpUtil.js?v=01062615"></script>
+
+</head>
+<body>
+<!-- gnb -->
+<header>
+    
+
+
+
+<div class="headerDiv" id="sect-gnb">
+    <div class="top_aside">
+        <ul>
+            <li class="on"><a href="https://www.reb.or.kr/reb/main.do" target="_blank">한국부동산원</a></li>
+            <li><a href="https://www.reb.or.kr/r-one/" target="_blank">부동산통계</a></li>
+            
+        </ul>
+        <div class="zoom">
+            <span>글자크기</span>
+            <button class="zoom_in" onclick="glbDisplayZoom.zoomOut();"></button>
+            <button class="zoom_out" onclick="glbDisplayZoom.zoomIn();"></button>
+        </div>
+    </div>
+
+
+    <div class="gnb_wrap">
+        <h1 onclick="location.href='/portal/main/indexPage.do';">
+            <a href="javascript:;">부동산테크</a>
+        </h1>
+        <div class="gnb_menu">
+            <ul class="top-menu">
+                
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/land/landMap.do" class="menu" title="부동산시세">부동산시세</a>
+
+                        
+                        
+
+                        
+                        
+                        </li>
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/analytics/analReprot.do" class="menu" title="부동산 분석">부동산 분석</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/analytics/analReprot.do" title="부동산 분석리포트">부동산 분석리포트</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+                            
+                        
+
+                        <li class="on">
+                        <a href="/portal/info/landInfo.do" class="menu" title="부동산 정보">부동산 정보</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/landInfo.do" title="부동산 뉴스">부동산 뉴스</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                            <a href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank" class="openurl" title="보도자료">보도자료</a>
+                                        
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/bodLbry.do" title="자료실">자료실</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/rental/rentalMarket.do" class="menu" title="임대시장 사이렌">임대시장 사이렌</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/rental/rentalMarket.do" title="임대시장 현황">임대시장 현황</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/intro/intro.do" class="menu" title="소개">소개</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/intro.do" title="소개">소개</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/bodFaq.do" title="자주묻는질문">자주묻는질문</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                
+                </li>
+            </ul>
+        </div>
+        <div class="mobile_aside m_block">
+            <a href="" class="search" id="totalSearchBtn">검색</a>
+            <a href="javascript:;" class="sitemap" id="totalmenuBtn" onclick="glbMobileMenu.show();">전체메뉴</a>
+        </div>
+    </div>
+
+    <!-- 모바일 전체메뉴 :S-->
+    <div class="totalmenu_mobile" style="display: none">
+        <div class="totalmenu-wrapper-mobile">
+            <div class="title">
+                <p class="mobile-title">전체메뉴</p>
+                <button class="btn_closed" id="totalmenu_close">닫기</button>
+            </div>
+            <div class="totalmenu-area-mobile">
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                
+                                    <a href="/land/landMap.do" class="" title="부동산시세">부동산시세</a>
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">부동산 분석<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/analytics/analReprot.do" class="" title="부동산 분석리포트">부동산 분석리포트</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                        
+                        
+                            
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">부동산 정보<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="selected" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/info/landInfo.do" class="" title="부동산 뉴스">부동산 뉴스</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                            <a href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank" class="openurl" title="보도자료">보도자료</a>
+                                        
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                            
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/bodLbry.do" class="selected" title="자료실">자료실</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">임대시장 사이렌<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/rental/rentalMarket.do" class="" title="임대시장 현황">임대시장 현황</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">소개<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/intro/intro.do" class="" title="소개">소개</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/bodFaq.do" class="" title="자주묻는질문">자주묻는질문</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                
+            </div>
+            
+        </div>
+    </div>
+    <!-- //모바일 전체메뉴 :e-->
+
+</div>
+</header>
+<!-- //gnb -->
+
+<!-- container_box -->
+<div class="container_box">
+
+    <!-- location -->
+    <div class="contents-navigation">
+        <div>
+            <span class="icon-home">Home</span>
+            <span class="icon-gt">&gt;</span>
+            <span class="location">부동산 정보</span>
+            <span class="icon-gt">&gt;</span>
+            <strong>자료실</strong>
+        </div>
+    </div>
+    <!-- //location -->
+
+    <div class="content">
+        <!-- lnb -->
+        
+
+
+
+
+<!-- lnb -->
+<div class="lnb">
+    <h2>부동산 정보</h2>
+    <ul>
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+                
+                
+                
+                    
+                    
+                    
+                    
+                
+                <li>
+                    
+                    
+                        <a class="" href="/portal/info/landInfo.do">부동산 뉴스</a>
+                    
+                </li>
+            
+        
+            
+                
+                
+                
+                    
+                    
+                    
+                    
+                
+                <li>
+                    
+                        <a class="openurl" href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank">보도자료</a>
+                    
+                    
+                </li>
+            
+        
+            
+                
+                
+                
+                    
+                    
+                        
+                    
+                    
+                    
+                
+                <li>
+                    
+                    
+                        <a class="selected" href="/portal/info/bodLbry.do">자료실</a>
+                    
+                </li>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </ul>
+</div>
+<!-- //lnb -->
+
+<!-- mobile lnb -->
+<div class="mobile-menu-overlay"></div>
+<div class="contents-title-mobile" id="menuChild">
+    <h3>
+        자료실
+        <span class="arrow"></span>
+    </h3>
+    <ul id="mobile_menu_all_sect" style="display: none;">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+                
+                
+                
+                    
+                    
+                    
+                    
+                
+
+                <li>
+                    
+                    
+                        <a class="" href="/portal/info/landInfo.do">부동산 뉴스</a>
+                    
+                </li>
+            
+        
+            
+                
+                
+                
+                    
+                    
+                    
+                    
+                
+
+                <li>
+                    
+                        <a class="openurl" href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank">보도자료</a>
+                    
+                    
+                </li>
+            
+        
+            
+                
+                
+                
+                    
+                    
+                        
+                    
+                    
+                    
+                
+
+                <li>
+                    
+                    
+                        <a class="selected" href="/portal/info/bodLbry.do">자료실</a>
+                    
+                </li>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </ul>
+</div>
+<!-- //mobile lnb -->
+        <!-- //lnb -->
+
+        <!-- content -->
+        <div class="cont">
+            <div class="contents-title-wrapper">
+                <h3>자료실<span class="arrow"></span></h3>
+                <div>
+                    <button class="btns_print">인쇄</button>
+                </div>
+            </div>
+            <div class="contents-area">
+                <!-- CMS 시작 -->
+
+                <div class="board-area">
+                    <!-- board search -->
+                    <fieldset>
+                        <form method="post" name="form" id="form">
+                            <input type = "hidden" name = "pstSn" id="pstSn" value=""/>
+                            <legend class="blind">검색</legend>
+                            <p class="total">
+                                총 <strong id="lbry-count-sect" style="vertical-align: top;">14</strong> 건
+                            </p>
+                            <div class="search-wrapper">
+                                <div class="search-area fl">
+                                    
+                                   
+                                    <div class="search-box">
+                                        <label class="blind" for="searchKeyword">검색어</label>
+                                        <input type="search" id="searchKeyword" title="검색어 입력" placeholder="검색어를 입력하세요"/>
+                                        <button type="button" id="btnSearch">검색</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </fieldset>
+                    <!-- //board search -->
+
+                    <div class="board-list01">
+                        <table id="lbry-data-table">
+                            <caption>자료실-번호,제목,첨부파일,등록일,조회수 등 정보제공</caption>
+                            <thead>
+                            <tr>
+                                <th class="number" scope="col">번호</th>
+                                <th class="title" scope="col">제목</th>
+
+                                <th class="date" scope="col">등록일</th>
+                                <th class="hit" scope="col">조회</th>
+                            </tr>
+                            </thead>
+                            <tbody id="lbry-list-sect"></tbody>
+                        </table>
+
+                        <!-- page -->
+                        <div id="lbry-pager-sect"></div>
+                        <!-- // page -->
+
+                        
+                        <div class="mobile_paging" id="mobile-page-sect"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- //content -->
+    </div>
+
+</div>
+<!-- //container_box -->
+
+<!-- footer -->
+
+
+
+<!-- 소규모단지 공지 -->
+<div class="layer_popup" id="layer__smallhouse_pop_noti" style="display:none;">
+    <div class="popup_div" style="width: 400px">
+        <div class="content_pop">
+            <div class="pop_info_txt">
+                <dl>
+                    <dt>안내</dt>
+                    <dd>소규모단지 시세는 부동산테크와 별개의 시세로 전세사기 방지를 위한 참고용 시세입니다.</dd>
+                    <dd>모형에 의해 자동 추정된 가격이며 리모델링, 서비스면적, 마감재 등 개별 사항은 반영되지 않습니다.</dd>
+                </dl>
+                <button class="btn btn-outline-primary" onclick="javascript: $('#layer__smallhouse_pop_noti').hide();">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick -->
+<div class="quick_menu">
+    <a href="javascript:void(0);" class="quick_menu_search" id="footer__btn__quick_keyword">
+        <span>빠른검색</span>
+    </a>
+    <dl>
+        <dt>QUICK<br>MENU</dt>
+        <dd>
+            <a href="/land/landMap.do" title="부동산 시세" target="_blank">부동산 시세</a>
+        </dd>
+        <dd>
+            <a href="/portal/analytics/analReprot.do" title="부동산 분석">부동산 분석</a>
+        </dd>
+        <dd>
+            <a href="/land/landMap.do?interestComplexYn=Y" title="관심단지">관심단지</a>
+        </dd>
+    </dl>
+    <a href="#" class="btn_qtop">top</a>
+</div>
+<!-- //Quick -->
+
+<!-- 빠른검색 -->
+<div class="quick_search" id="footer__div__quick_search_sect">
+    <div>
+        <div>
+            <strong>빠른검색</strong>
+            <div class="quick_outer">
+                <select id="footer__cbo__keyword_type">
+                    <option value="AO">공동주택+오피스텔</option>
+                    <option value="SM">소규모단지</option>
+                </select>
+                <div class="quick_form">
+                    <label for="footer__txt__quick_search" class="blind">검색</label>
+                    <input type="text" id="footer__txt__quick_search" title="검색">
+                    <button type="button" id="footer__btn__quick_search">검색</button>
+                </div>
+            </div>
+            <a href="javascript:;" id="footer__btn_search_close">닫기</a>
+
+
+
+
+
+            <div class="quick_search_region">
+                <!-- 시구군 선택 :S-->
+                <div class="ft_Quick_region_div" id="footer__sect__region_keyword" style="display: none;">
+                    <ul>
+                        <li onclick="$('#footer__sect__region_keyword__do').show();">
+                            <button id="footer__btn__region_keyword__do">시/도 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__do" style="display: none;">
+                                <div class="title">
+                                    <span>시/도</span>
+                                    <button onclick="$('#footer__sect__region_keyword__do').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__do"></ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li onclick="$('#footer__sect__region_keyword__gu').show();">
+                            <button id="footer__btn__region_keyword__gu">시/군 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__gu" style="display: none;">
+                                <div class="title">
+                                    <span>군/구</span>
+                                    <button onclick="$('#footer__sect__region_keyword__gu').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__gu">
+                                        <li><a href="javascript:;" value="">전체선택</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li onclick="$('#footer__sect__region_keyword__dong').show();">
+                            <button id="footer__btn__region_keyword__dong">동 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__dong" style="display: none;">
+                                <div class="title">
+                                    <span>동</span>
+                                    <button onclick="$('#footer__sect__region_keyword__dong').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__dong">
+                                        <li><a href="javascript:;" value="">전체선택</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- //시구군 선택 :E-->
+            </div>
+            <div class="quick_result" id="footer__div__quick_search_list" style="display: none;">
+                <div class="total_num">총 <span>0</span>건이 검색되었습니다.</div>
+                <ul></ul>
+                <a href="javascript:;" id="footer__btn_search_list_close">닫기</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- //빠른검색 -->
+<!-- 모바일 퀵메뉴 (S)-->
+<div class="footer_quick_go">
+    <a href="javascript:;" class="btn-quick-go">Quick<br>메뉴</a>
+    <a href="javascript:;" class="btn-top-go" >TOP</a>
+</div>
+<div class="mobile_quickmenu" style="display:none ;">
+    <div class="mobile_quickmenu_box">
+        <div>
+            <strong>Quick 메뉴</strong>
+            <ul>
+                <li><a href="javascript:;" id="quickSearch" title="빠른검색">빠른검색</a></li>
+                <li><a href="/land/landMap.do" target="_blank" title="부동산 시세">부동산 시세</a></li>
+                <li><a href="/portal/analytics/analReprot.do" title="부동산 분석">부동산 분석</a></li>
+                <li><a href="/land/landMap.do?interestComplexYn=Y" title="관심단지">관심단지</a></li>
+            </ul>
+        </div>
+
+    </div>
+    <a href="javascript:;" class="mobile_quick_x">닫기</a>
+</div>
+<!-- // 모바일 퀵메뉴 (E)-->
+<footer>
+    <div>
+        <a href="#" class="footer_logo">REB 부동산테크</a>
+        <div class="footer_menu">
+            <ul>
+                <li>대표번호 : 1644-2828</li>
+                <li><a href="https://www.reb.or.kr/reb/cm/cntnts/cntntsView.do?mi=9975&cntntsId=1291" target="new"
+                       class="f_gaein">개인정보보호정책</a></li>
+                <li><a href="https://www.reb.or.kr/reb/lm/location/locationMapView.do?mi=9699" target="new">찾아오시는 길</a>
+                </li>
+            </ul>
+            <address>
+                대구광역시 동구 이노밸리로 291 [신서동 919-2] 한국부동산원
+            </address>
+            <div>COPYRIGHT ⓒKOREA REAL ESTATE BOARD. <br> ALL RIGHTS RESERVED.</div>
+        </div>
+        <div class="footer_com">
+            <span>자회사 : 알이비파트너스 주식회사</span>
+            <span>대구광역시 동구 이노밸리로 309, 3층 [신서동 1149-2]</span>
+        </div>
+        <div class="footer_site">
+            <label for="footer__cbo_familySite" class="blind">패밀리사이트</label>
+            <select id="footer__cbo_familySite">
+                <option value="">패밀리사이트</option>
+                <option value="https://www.reb.or.kr">한국부동산원</option>
+                <option value="https://www.reb.or.kr/r-one">R-ONE(부동산통계정보시스템)</option>
+                <option value="https://www.applyhome.co.kr">청약홈</option>
+                <option value="https://www.k-apt.go.kr">K-apt(공동주택관리정보시스템)</option>
+            </select>
+            
+        </div>
+    </div>
+
+
+    <div class="footer-search-container hidden" id="footer__quick_map_search" style="position: relative; width: 300px; margin: 20px auto;">
+        <div class="search-input-box" style="display: flex; gap: 5px;">
+            <label for="footer__quick_map__input" class="blind">검색어를 입력하세요.</label>
+            <input type="text" id="footer__quick_map__input" placeholder="검색어를 입력하세요" style="flex: 1; padding: 8px; border: 1px solid #ddd;" title="검색어를 입력하세요.">
+        </div>
+        <div id="footer__quick_map__list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #fff; border: 1px solid #ddd; border-top: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+            <ul style="list-style: none; padding: 0; margin: 0;"></ul>
+        </div>
+    </div>
+
+    <form id="global-hidden-form"></form>
+    <script type="text/javascript" src="/js/portal/main/footer.js"></script>
+
+</footer>
+<!-- //footer -->
+<script type="text/javascript" src="/js/portal/info/bodLbry.js"></script>
+</body>
+
+</html>

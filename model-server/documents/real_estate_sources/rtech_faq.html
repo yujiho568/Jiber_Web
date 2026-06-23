@@ -1,0 +1,1437 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S3NS9NWTLZ"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-S3NS9NWTLZ');
+</script>
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta property="og:image" content="/img/portal/og_kakao.png?v=01062615"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>부동산테크</title>
+
+<script src="/css/land/assets/dist/js/bootstrap.bundle.min.js"></script>
+<link href="/css/land/assets/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/land/default.css?v=01062615">
+<link rel="stylesheet" href="/css/land/common.css?v=01062615">
+<link rel="stylesheet" href="/css/land/layout.css?v=01062615">
+<link rel="stylesheet" href="/css/portal/contents.css?v=01062615">
+
+    
+    
+        <link rel="stylesheet" href="/css/land/map.css?v=01062615">
+    
+
+<link rel="stylesheet" href="/css/land/mobile.css?v=01062615">
+
+<script language="javascript" src="/js/assets/jquery/jquery-3.7.1.min.js"></script>
+
+<script language="javascript" src="/js/lodash.min.js"></script>
+<script language="javascript" src="/js/jquery.showLoading.js"></script>
+<script language="javascript" src="/js/json2.js"></script>
+
+<script language="javascript" src="/js/dateUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/portal/common/tblManger.js"></script>
+<script language="javascript" src="/js/stringUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/calendar.js?v=01062615"></script>
+
+<script language="javascript" src="/js/bPopup.js"></script>
+<script language="javascript" src="/js/inputMng.js"></script>
+<!-- Load jQuery Here -->
+<!--[if lt IE 7]>
+<script  language="javascript" src="/js/IE9.js"></script>
+<script  language="javascript" src="/js/ie7-squish.js"></script>
+<script  language="javascript" src="/js/PIE.js"></script>
+<script  language="javascript" src="/js/html5.js"></script>
+<![endif]-->
+<script language="javascript" src="/js/geocent.js"></script>
+<script language="javascript" src="/js/cscs.js"></script>
+<script language="javascript" src="/js/tmerc.js"></script>
+<script language="javascript" src="/js/KOREA_CENTER_TM_3param.js"></script>
+<script language="javascript" src="/js/rSlider.min.js"></script>
+<script language="javascript" src="/js/assets/jquery/jquery-ui.js?v=01062615"></script>
+<script language="javascript" src="/js/cookie.js"></script>
+
+<script language="javascript" src="/js/assets/axios/axios.min.js"></script>
+
+<script>
+    var glb_ctxPathJS = "";
+</script>
+<script language="javascript" src="/js/portal/common/common.js?v=01062615"></script>
+
+<script language="javascript" src="/js/common/common.js?v=01062615"></script>
+<script language="javascript" src="/js/common/commonStrUtil.js?v=01062615"></script>
+<script language="javascript" src="/js/common/commonHelpUtil.js?v=01062615"></script>
+
+</head>
+<body>
+
+<!-- gnb -->
+<header>
+    
+
+
+
+<div class="headerDiv" id="sect-gnb">
+    <div class="top_aside">
+        <ul>
+            <li class="on"><a href="https://www.reb.or.kr/reb/main.do" target="_blank">한국부동산원</a></li>
+            <li><a href="https://www.reb.or.kr/r-one/" target="_blank">부동산통계</a></li>
+            
+        </ul>
+        <div class="zoom">
+            <span>글자크기</span>
+            <button class="zoom_in" onclick="glbDisplayZoom.zoomOut();"></button>
+            <button class="zoom_out" onclick="glbDisplayZoom.zoomIn();"></button>
+        </div>
+    </div>
+
+
+    <div class="gnb_wrap">
+        <h1 onclick="location.href='/portal/main/indexPage.do';">
+            <a href="javascript:;">부동산테크</a>
+        </h1>
+        <div class="gnb_menu">
+            <ul class="top-menu">
+                
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/land/landMap.do" class="menu" title="부동산시세">부동산시세</a>
+
+                        
+                        
+
+                        
+                        
+                        </li>
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/analytics/analReprot.do" class="menu" title="부동산 분석">부동산 분석</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/analytics/analReprot.do" title="부동산 분석리포트">부동산 분석리포트</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/info/landInfo.do" class="menu" title="부동산 정보">부동산 정보</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/landInfo.do" title="부동산 뉴스">부동산 뉴스</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                            <a href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank" class="openurl" title="보도자료">보도자료</a>
+                                        
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/bodLbry.do" title="자료실">자료실</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+
+                        <li class="">
+                        <a href="/portal/rental/rentalMarket.do" class="menu" title="임대시장 사이렌">임대시장 사이렌</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/rental/rentalMarket.do" title="임대시장 현황">임대시장 현황</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                        
+                        
+                        
+                            
+                        
+
+                        <li class="on">
+                        <a href="/portal/intro/intro.do" class="menu" title="소개">소개</a>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="subDep">
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/intro.do" title="소개">소개</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/bodFaq.do" title="자주묻는질문">자주묻는질문</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                        </li>
+                    
+                
+                    
+                
+                    
+                
+                </li>
+            </ul>
+        </div>
+        <div class="mobile_aside m_block">
+            <a href="" class="search" id="totalSearchBtn">검색</a>
+            <a href="javascript:;" class="sitemap" id="totalmenuBtn" onclick="glbMobileMenu.show();">전체메뉴</a>
+        </div>
+    </div>
+
+    <!-- 모바일 전체메뉴 :S-->
+    <div class="totalmenu_mobile" style="display: none">
+        <div class="totalmenu-wrapper-mobile">
+            <div class="title">
+                <p class="mobile-title">전체메뉴</p>
+                <button class="btn_closed" id="totalmenu_close">닫기</button>
+            </div>
+            <div class="totalmenu-area-mobile">
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                
+                                    <a href="/land/landMap.do" class="" title="부동산시세">부동산시세</a>
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">부동산 분석<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/analytics/analReprot.do" class="" title="부동산 분석리포트">부동산 분석리포트</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">부동산 정보<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/info/landInfo.do" class="" title="부동산 뉴스">부동산 뉴스</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                            <a href="https://www.reb.or.kr/reb/na/ntt/selectNttList.do?mi=9565&amp;bbsId=1154" target="_blank" class="openurl" title="보도자료">보도자료</a>
+                                        
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/info/bodLbry.do" class="" title="자료실">자료실</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">임대시장 사이렌<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/rental/rentalMarket.do" class="" title="임대시장 현황">임대시장 현황</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                        
+                        
+                            
+                        
+
+                        
+                        <h2>
+                            
+                            
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                            
+                                
+                                    
+                                
+                            
+                                
+                                    
+                                
+                            
+                            
+                                
+                                    <a href="javascript:void(0);" role="button" class="">소개<span class="arrow"></span></a>
+                                
+                                
+                            
+                        </h2>
+
+                        
+                        
+
+                        
+                        
+                            <ul class="selected" style="display: block;">
+                                <li>
+                                        
+                                        
+                                            <a href="/portal/intro/intro.do" class="" title="소개">소개</a>
+                                        
+                                    </li>
+                                
+                            
+                                
+                                    
+                                    
+                                        
+                                        
+                                            
+                                        
+                                        
+                                        
+                                    
+                                    <li>
+                                        
+                                        
+                                            <a href="/portal/intro/bodFaq.do" class="selected" title="자주묻는질문">자주묻는질문</a>
+                                        
+                                    </li>
+                            </ul>
+                        
+                    
+                
+                    
+                
+                    
+                
+            </div>
+            
+        </div>
+    </div>
+    <!-- //모바일 전체메뉴 :e-->
+
+</div>
+</header>
+<!-- //gnb -->
+
+<!-- container_box -->
+<div class="container_box">
+
+    <!-- location -->
+    <div class="contents-navigation">
+        <div>
+            <span class="icon-home">Home</span>
+            <span class="icon-gt">&gt;</span>
+            <span class="location">소개</span>
+            <span class="icon-gt">&gt;</span>
+            <strong>자주묻는질문</strong>
+        </div>
+    </div>
+    <!-- //location -->
+
+    <div class="content">
+        <!-- lnb -->
+        
+
+
+
+
+<!-- lnb -->
+<div class="lnb">
+    <h2>소개</h2>
+    <ul>
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+                
+                
+                
+                    
+                    
+                    
+                    
+                
+                <li>
+                    
+                    
+                        <a class="" href="/portal/intro/intro.do">소개</a>
+                    
+                </li>
+            
+        
+            
+                
+                
+                
+                    
+                    
+                        
+                    
+                    
+                    
+                
+                <li>
+                    
+                    
+                        <a class="selected" href="/portal/intro/bodFaq.do">자주묻는질문</a>
+                    
+                </li>
+            
+        
+    </ul>
+</div>
+<!-- //lnb -->
+
+<!-- mobile lnb -->
+<div class="mobile-menu-overlay"></div>
+<div class="contents-title-mobile" id="menuChild">
+    <h3>
+        자주묻는질문
+        <span class="arrow"></span>
+    </h3>
+    <ul id="mobile_menu_all_sect" style="display: none;">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+                
+                
+                
+                    
+                    
+                    
+                    
+                
+
+                <li>
+                    
+                    
+                        <a class="" href="/portal/intro/intro.do">소개</a>
+                    
+                </li>
+            
+        
+            
+                
+                
+                
+                    
+                    
+                        
+                    
+                    
+                    
+                
+
+                <li>
+                    
+                    
+                        <a class="selected" href="/portal/intro/bodFaq.do">자주묻는질문</a>
+                    
+                </li>
+            
+        
+    </ul>
+</div>
+<!-- //mobile lnb -->
+        <!-- //lnb -->
+
+        <!-- content -->
+        <div class="cont">
+            <div class="contents-title-wrapper">
+                <h3>자주묻는질문<span class="arrow"></span></h3>
+                <div>
+                    <button class="btns_print">인쇄</button>
+                </div>
+            </div>
+            <div class="contents-area">
+                <div class="board-area faq">
+                    <form method="post" name="frmaptBoard" id="frmaptBoard">
+                        <legend class="blind">검색</legend>
+                        <div class="top_search">
+                            
+                            <div class="search-wrapper">
+                                <div class="search-area fl faq_search">
+                                    <select id="faq-searchtype-combo" name="searchType" title="검색 선택창">
+                                        <option value="all">전체</option>
+                                        <option value="bbsTit">질문</option>
+                                        <option value="bbsCont">답변</option>
+                                    </select>
+                                    <div class="search-box">
+                                        <label class="blind" for="faq-searchword-field">검색어 입력</label>
+                                        <input type="search" id="faq-searchword-field" name="searchKeyword" title="검색어 입력" placeholder="검색어를 입력하세요">
+                                        <button type="button" id="faq-search-button" >검색</button>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- FAQ -->
+                    <div id="faq-data-sect" class="faq-list-wrapper">
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">부동산테크란?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        전국의 시세파악이 가능한 공동주택을 구축하여 대국민 정보제공, 금융기관의 담보 및 보증업무에 참고자료로 활용되는 정보서비스입니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">부동산테크 기준일은 언제이고, 언제 업데이트 되나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        <p>매주 월요일 기준 시세를 해당 주 금요일에 부동산테크 홈페이지(www.rtech.or.kr)에서 발표하고 있습니다.</p>
+ㅇ시세기준일 : 매주 월요일<br />
+ㅇ시세공개일 : 매주 금요일
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">협력공인중개사란 무엇인가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        한국부동산원 공동주택 시세조사 시 모니터링 협조와 자문 등을 통해 도움을 주시는 한국부동산원의 파트너 공인중개사 회원을 의미합니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">50세대 미만 아파트 및 연립다세대 참고시세란 무엇인가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        전국 50세대 미만 소규모 공동주택에 대해 머신러닝, 실거래, 매물 등을 바탕으로 모형을 통해 자동산정한 가격으로 금융기관의 담보 및 보증업무에 사용할 수 없는 단순 참고자료로써, 전세사기 피해 방지를 위한 정책 지원 목적의 대국민 정보제공 서비스입니다.<br />
+ㅇ시세기준일 및 공개일: 매월 1일
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">상한평균가와 하한평균가란 무엇인가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        ㅇ상한평균가 : 해당 면적내에서 선호도가 가장 높은 층의 평균적인 거래 가능가격을 의미합니다.<br />
+ㅇ하한평균가 : 해당 면적내에서 선호도가 가장 낮은 층의 평균적인 거래 가능가격을 의미합니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">거래가능가격은 무엇인가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        한국부동산원이 조사한 일반적이고 통상적인 거래가능 가격을 의미합니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">면적별 시세란 무엇인가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        평형별 상한평균가 및 하한평균가를 의미하며, 가격범위로 조회가 됩니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">호별 시세란 무엇인가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        면적별(평형별) 시세를 층,호별 격차율 지수로 산정한 개별호에 대한 상한평균가 및 하한평균가를 의미합니다.<br />
+다만, 건축물대장상 면적은 타 평형과 동일하나 다락방 등 서비스 면적으로 특이성을 갖는 세대는 평균적인 범위 밖의 세대로 간주되어 개별 호시세를 발표하지 않고 있습니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">부동산테크 시세와 &#39;50세대 미만 아파트 및 연립다세대 참고시세&#39;가 어떻게 다른가요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        ㅇ부동산테크 시세: 한국부동산원이 조사한 시세로, 금융감독원 시행세칙에 따라 금융기관의 담보 및 보증업무에 참고자료로 사용할 수 있는 가격을 의미합니다.<br />
+ㅇ50세대 미만 아파트 및 연립다세대 참고시세: 머신러닝, 실거래, 매물 등을 바탕으로 모형을 통해 자동산정한 가격으로 금융기관의 담보 및 보증업무에 사용할 수 없는 단순 참고자료로써, 전세사기 피해 방지를 위한 정책 지원 목적의 대국민 정보제공 서비스입니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">우리 아파트는 왜 시세 검색이 안되나요? / 신규아파트는 시세 등록이 언제되나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        부동산테크의 시세는 50세대 이상 아파트와 100세대 이상의 일부 공동주택을 대상으로 발표하고 있습니다.<br />
+다만, 미분양&middot;신축단지&middot;전매제한 단지는 실거래가 등 가격정보가 충분히 생성된 이후에 시세 제공이 가능하며, 재건축&middot;재개발 단지는 사업진행상황에 따라 시세 제공이 중단 될 수 있습니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">아파트 담보 대출시 시세가 필요합니다.</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        금융기관은 우리원과 같이 공개되는 시세를 기준으로 대출을 할 수 있지만, 그 외에 금융감독원 시행세칙에 근거한 [주택관련 담보대출에 대한 리스크관리 기준]에 따라 담보가치 및 시가 산정 방식은<br />
+1. 국세청 기준시가 이내<br />
+2. 감정평가업자의 감정평가액 이내<br />
+3. 한국부동산원 시세 중간가 이내<br />
+4. KB 부동산시세의 일반평균가 이내로 기준할 수 있습니다.<br />
+즉, 한국부동산원에서 부동산테크 시세를 제공하지 않는 단지라고 해서 대출이 불가한 것은 아니므로, 타 기준에 따른 시세를 확인 하시거나 그 외 대출 가능한 방법을 금융기관에 문의하여 주시기 바랍니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">오피스텔 시세는 제공이 안되나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        한국부동산원은 100세대 이상 일부 오피스텔의 시세를 대국민서비스 및 전세사기 피해방지 등 정부 정책을 위해 발표하고 있습니다.<br />
+다만, 실거래가 등 시세 정보가 없거나 다락방, 테라스 등이 소재한 특수 호의 경우 시세를 발표하지 않거나, 중단할 수도 있습니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">실거래가 반영이 왜 안되나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        개별 세대의 리모델링, 하자, 그 밖의 사정 등으로 인하여 평균범위를 벗어나는 실거래 가격은 시세에 반영되지 않으며, 실거래가의 적정 여부 판단 등을 위해 실거래가의 시세 반영은 통상 2~3주의 기간이 소요 될 수 있습니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">협력공인중개사가 입력하는 시세가 왜 반영이 안되나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        부동산테크는 협력공인중개업소 의견만 반영하는 것이 아니라 실거래 신고가격, 매물가격 등의 정보를 반영하여 시세를 설정하고 있습니다.<br />
+따라서 실거래가격 등 다른 가격정보에서 시세 조정 근거가 부족하다고 검토될 경우 시세가 변동되지 않을 수 있습니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">부동산테크 홈페이지 접속이 안됩니다.</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        과도한 반복 접속으로 인해 크롤링으로 의심되어 IP가 차단된 경우 일 수 있습니다.<br />
+IP주소 또는 접속 기기를 변경하시거나 핸드폰으로 이용하시면 접속 가능합니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">부동산테크 정보 구매는 어떻게 하나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        시세 참고 등 업무 편의를 위하여 부동산테크 정보를 상호 협의된 전산 방법(FTP 등)에 따라 유상 제공하고 있습니다.<br />
+1. 제공정보 : 주소정보, 단지정보, 면적정보, 시세정보<br />
+2. 정보사용료 : 표준사용료 및 이용기관, 이용건수에 따라 협의<br />
+3. 구매 문의 : 관련 상담 및 문의는 콜센터 1644-2828에서 답변 드리겠습니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">[50세대 미만 아파트 및 연립다세대 참고시세] 우리 집은 왜 검색이 안되나요?</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        참고시세의 경우, 공동주택(다세대, 연립주택 등)을 대상으로 서비스 되며, 단독(다가구, 다중) 제공되지 않습니다.<br />
+다만, 일부 가격의 정밀조사 및 검증이 필요한 주택은 시세를 공개하지 않고 있습니다. 향후 검증 결과에 따라 시세가 다시 제공될 수 있으며, 시세는 매월 1일 업데이트됩니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">[협력공인중개사] 비밀번호를 잊어버렸어요.</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        개인정보이므로 아이디 및 비밀번호는 본인 이외에 알 수 없습니다. 아이디/비밀번호 찾기 기능을 통해 새로운 비밀번호를 발급받으셔야 합니다.<br />
+전화번호가 변경되신 경우에는 콜센터 1644-2828을 통해 연락하시어 수정하시길 바랍니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">[협력공인중개사] 비밀번호를 5회 이상 틀렸어요.</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        개인정보이므로 아이디 및 비밀번호는 본인 이외에 알 수 없습니다. 아이디/비밀번호 찾기 기능을 통해 새로운 비밀번호를 발급받으셔야 합니다.<br />
+전화번호가 변경되신 경우에는 콜센터 1644-2828을 통해 연락하시어 수정하시길 바랍니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                            <dl>
+                                <dt class="on">
+                                    <button type="button">
+                                        <span class="icon-q">Q.</span>
+                                        <p class="title pstTtl">[협력공인중개사] 시세입력홈페이지가 접속이 안돼요.</p>
+                                        <span class="arrow"></span>
+                                    </button>
+                                </dt>
+                                <dd>
+                                    <span class="icon-a">A.</span>
+                                    <div class="submit pstTxtCn">
+                                        인터넷익스플로러 서비스 만료로 해당 인터넷브라우저 사용 시 접속이 불가할 수 있습니다.<br />
+엣지, 크롬 등 타 인터넷브라우저 사용바랍니다.
+                                    </div>
+                                </dd>
+                            </dl>
+                        
+                    </div>
+                    <!-- //FAQ -->
+
+                    <!-- //CMS 끝 -->
+                </div>
+
+            </div>
+        </div>
+        <!-- //content -->
+    </div>
+
+</div>
+</div>
+<!-- //container_box -->
+
+<!-- footer -->
+
+
+
+<!-- 소규모단지 공지 -->
+<div class="layer_popup" id="layer__smallhouse_pop_noti" style="display:none;">
+    <div class="popup_div" style="width: 400px">
+        <div class="content_pop">
+            <div class="pop_info_txt">
+                <dl>
+                    <dt>안내</dt>
+                    <dd>소규모단지 시세는 부동산테크와 별개의 시세로 전세사기 방지를 위한 참고용 시세입니다.</dd>
+                    <dd>모형에 의해 자동 추정된 가격이며 리모델링, 서비스면적, 마감재 등 개별 사항은 반영되지 않습니다.</dd>
+                </dl>
+                <button class="btn btn-outline-primary" onclick="javascript: $('#layer__smallhouse_pop_noti').hide();">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick -->
+<div class="quick_menu">
+    <a href="javascript:void(0);" class="quick_menu_search" id="footer__btn__quick_keyword">
+        <span>빠른검색</span>
+    </a>
+    <dl>
+        <dt>QUICK<br>MENU</dt>
+        <dd>
+            <a href="/land/landMap.do" title="부동산 시세" target="_blank">부동산 시세</a>
+        </dd>
+        <dd>
+            <a href="/portal/analytics/analReprot.do" title="부동산 분석">부동산 분석</a>
+        </dd>
+        <dd>
+            <a href="/land/landMap.do?interestComplexYn=Y" title="관심단지">관심단지</a>
+        </dd>
+    </dl>
+    <a href="#" class="btn_qtop">top</a>
+</div>
+<!-- //Quick -->
+
+<!-- 빠른검색 -->
+<div class="quick_search" id="footer__div__quick_search_sect">
+    <div>
+        <div>
+            <strong>빠른검색</strong>
+            <div class="quick_outer">
+                <select id="footer__cbo__keyword_type">
+                    <option value="AO">공동주택+오피스텔</option>
+                    <option value="SM">소규모단지</option>
+                </select>
+                <div class="quick_form">
+                    <label for="footer__txt__quick_search" class="blind">검색</label>
+                    <input type="text" id="footer__txt__quick_search" title="검색">
+                    <button type="button" id="footer__btn__quick_search">검색</button>
+                </div>
+            </div>
+            <a href="javascript:;" id="footer__btn_search_close">닫기</a>
+
+
+
+
+
+            <div class="quick_search_region">
+                <!-- 시구군 선택 :S-->
+                <div class="ft_Quick_region_div" id="footer__sect__region_keyword" style="display: none;">
+                    <ul>
+                        <li onclick="$('#footer__sect__region_keyword__do').show();">
+                            <button id="footer__btn__region_keyword__do">시/도 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__do" style="display: none;">
+                                <div class="title">
+                                    <span>시/도</span>
+                                    <button onclick="$('#footer__sect__region_keyword__do').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__do"></ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li onclick="$('#footer__sect__region_keyword__gu').show();">
+                            <button id="footer__btn__region_keyword__gu">시/군 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__gu" style="display: none;">
+                                <div class="title">
+                                    <span>군/구</span>
+                                    <button onclick="$('#footer__sect__region_keyword__gu').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__gu">
+                                        <li><a href="javascript:;" value="">전체선택</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li onclick="$('#footer__sect__region_keyword__dong').show();">
+                            <button id="footer__btn__region_keyword__dong">동 선택</button>
+                            <div class="region_select" id="footer__sect__region_keyword__dong" style="display: none;">
+                                <div class="title">
+                                    <span>동</span>
+                                    <button onclick="$('#footer__sect__region_keyword__dong').hide();">닫기</button>
+                                </div>
+                                <div class="scolling">
+                                    <ul id="footer__cbo__region_keyword__dong">
+                                        <li><a href="javascript:;" value="">전체선택</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- //시구군 선택 :E-->
+            </div>
+            <div class="quick_result" id="footer__div__quick_search_list" style="display: none;">
+                <div class="total_num">총 <span>0</span>건이 검색되었습니다.</div>
+                <ul></ul>
+                <a href="javascript:;" id="footer__btn_search_list_close">닫기</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- //빠른검색 -->
+<!-- 모바일 퀵메뉴 (S)-->
+<div class="footer_quick_go">
+    <a href="javascript:;" class="btn-quick-go">Quick<br>메뉴</a>
+    <a href="javascript:;" class="btn-top-go" >TOP</a>
+</div>
+<div class="mobile_quickmenu" style="display:none ;">
+    <div class="mobile_quickmenu_box">
+        <div>
+            <strong>Quick 메뉴</strong>
+            <ul>
+                <li><a href="javascript:;" id="quickSearch" title="빠른검색">빠른검색</a></li>
+                <li><a href="/land/landMap.do" target="_blank" title="부동산 시세">부동산 시세</a></li>
+                <li><a href="/portal/analytics/analReprot.do" title="부동산 분석">부동산 분석</a></li>
+                <li><a href="/land/landMap.do?interestComplexYn=Y" title="관심단지">관심단지</a></li>
+            </ul>
+        </div>
+
+    </div>
+    <a href="javascript:;" class="mobile_quick_x">닫기</a>
+</div>
+<!-- // 모바일 퀵메뉴 (E)-->
+<footer>
+    <div>
+        <a href="#" class="footer_logo">REB 부동산테크</a>
+        <div class="footer_menu">
+            <ul>
+                <li>대표번호 : 1644-2828</li>
+                <li><a href="https://www.reb.or.kr/reb/cm/cntnts/cntntsView.do?mi=9975&cntntsId=1291" target="new"
+                       class="f_gaein">개인정보보호정책</a></li>
+                <li><a href="https://www.reb.or.kr/reb/lm/location/locationMapView.do?mi=9699" target="new">찾아오시는 길</a>
+                </li>
+            </ul>
+            <address>
+                대구광역시 동구 이노밸리로 291 [신서동 919-2] 한국부동산원
+            </address>
+            <div>COPYRIGHT ⓒKOREA REAL ESTATE BOARD. <br> ALL RIGHTS RESERVED.</div>
+        </div>
+        <div class="footer_com">
+            <span>자회사 : 알이비파트너스 주식회사</span>
+            <span>대구광역시 동구 이노밸리로 309, 3층 [신서동 1149-2]</span>
+        </div>
+        <div class="footer_site">
+            <label for="footer__cbo_familySite" class="blind">패밀리사이트</label>
+            <select id="footer__cbo_familySite">
+                <option value="">패밀리사이트</option>
+                <option value="https://www.reb.or.kr">한국부동산원</option>
+                <option value="https://www.reb.or.kr/r-one">R-ONE(부동산통계정보시스템)</option>
+                <option value="https://www.applyhome.co.kr">청약홈</option>
+                <option value="https://www.k-apt.go.kr">K-apt(공동주택관리정보시스템)</option>
+            </select>
+            
+        </div>
+    </div>
+
+
+    <div class="footer-search-container hidden" id="footer__quick_map_search" style="position: relative; width: 300px; margin: 20px auto;">
+        <div class="search-input-box" style="display: flex; gap: 5px;">
+            <label for="footer__quick_map__input" class="blind">검색어를 입력하세요.</label>
+            <input type="text" id="footer__quick_map__input" placeholder="검색어를 입력하세요" style="flex: 1; padding: 8px; border: 1px solid #ddd;" title="검색어를 입력하세요.">
+        </div>
+        <div id="footer__quick_map__list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #fff; border: 1px solid #ddd; border-top: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+            <ul style="list-style: none; padding: 0; margin: 0;"></ul>
+        </div>
+    </div>
+
+    <form id="global-hidden-form"></form>
+    <script type="text/javascript" src="/js/portal/main/footer.js"></script>
+
+</footer>
+<!-- //footer -->
+<script type="text/javascript" src="/js/portal/intro/faq.js"></script>
+</body>
+
+</html>

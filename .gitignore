@@ -57,6 +57,9 @@ model-artifacts/
 *.parquet
 *.sqlite
 *.db
+!model-server/documents/
+!model-server/documents/**
+model-server/documents/**/.DS_Store
 
 # Local database files
 mysql-data/

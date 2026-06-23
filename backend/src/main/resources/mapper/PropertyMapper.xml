@@ -30,6 +30,11 @@
         </if>
     </sql>
 
+    <sql id="RecentTransactionFilters">
+        AND t.deal_date &gt;= #{recentSince}
+        <include refid="TransactionFilters"/>
+    </sql>
+
     <sql id="FilteredTransactionExists">
         <if test="(request.transactionTypes != null and request.transactionTypes.size() &gt; 0)
                 or request.minDealAmount != null
@@ -94,6 +99,20 @@
             WHERE t.property_id = p.property_id
             <include refid="TransactionFilters"/>
         ) AS deal_count
+        ,
+        <choose>
+            <when test="_parameter.containsKey('recentSince') and recentSince != null">
+                (
+                    SELECT COUNT(*)
+                    FROM property_transactions t
+                    WHERE t.property_id = p.property_id
+                    <include refid="RecentTransactionFilters"/>
+                )
+            </when>
+            <otherwise>
+                NULL
+            </otherwise>
+        </choose> AS recent_transaction_count
     </sql>
 
     <sql id="MapWhere">
@@ -142,6 +161,64 @@
         FROM properties p
         <include refid="MapWhere"/>
         ORDER BY latest_deal_date DESC, p.property_id DESC
+    </select>
+
+    <select id="findLegalDongClusters" resultType="com.jiber.backend.property.AdministrativeClusterRow">
+        SELECT
+            'LEGAL_DONG' AS level,
+            p.sido,
+            p.sigungu,
+            p.legal_dong,
+            p.legal_dong AS label,
+            AVG(p.latitude) AS center_lat,
+            AVG(p.longitude) AS center_lng,
+            COUNT(*) AS property_count,
+            CAST(SUM(COALESCE(rt.transaction_count, 0)) AS SIGNED) AS transaction_count,
+            CAST(ROUND(SUM(rt.total_deal_amount) / NULLIF(SUM(rt.priced_transaction_count), 0)) AS SIGNED) AS average_deal_amount
+        FROM properties p
+        LEFT JOIN (
+            SELECT
+                t.property_id,
+                COUNT(*) AS transaction_count,
+                SUM(COALESCE(t.deal_amount_krw, t.deposit_amount_krw)) AS total_deal_amount,
+                COUNT(COALESCE(t.deal_amount_krw, t.deposit_amount_krw)) AS priced_transaction_count
+            FROM property_transactions t
+            WHERE 1 = 1
+            <include refid="RecentTransactionFilters"/>
+            GROUP BY t.property_id
+        ) rt ON rt.property_id = p.property_id
+        <include refid="MapWhere"/>
+        GROUP BY p.sido, p.sigungu, p.legal_dong
+        ORDER BY property_count DESC, transaction_count DESC, label ASC
+    </select>
+
+    <select id="findSigunguClusters" resultType="com.jiber.backend.property.AdministrativeClusterRow">
+        SELECT
+            'SIGUNGU' AS level,
+            p.sido,
+            p.sigungu,
+            NULL AS legal_dong,
+            p.sigungu AS label,
+            AVG(p.latitude) AS center_lat,
+            AVG(p.longitude) AS center_lng,
+            COUNT(*) AS property_count,
+            CAST(SUM(COALESCE(rt.transaction_count, 0)) AS SIGNED) AS transaction_count,
+            CAST(ROUND(SUM(rt.total_deal_amount) / NULLIF(SUM(rt.priced_transaction_count), 0)) AS SIGNED) AS average_deal_amount
+        FROM properties p
+        LEFT JOIN (
+            SELECT
+                t.property_id,
+                COUNT(*) AS transaction_count,
+                SUM(COALESCE(t.deal_amount_krw, t.deposit_amount_krw)) AS total_deal_amount,
+                COUNT(COALESCE(t.deal_amount_krw, t.deposit_amount_krw)) AS priced_transaction_count
+            FROM property_transactions t
+            WHERE 1 = 1
+            <include refid="RecentTransactionFilters"/>
+            GROUP BY t.property_id
+        ) rt ON rt.property_id = p.property_id
+        <include refid="MapWhere"/>
+        GROUP BY p.sido, p.sigungu
+        ORDER BY property_count DESC, transaction_count DESC, label ASC
     </select>
 
     <select id="searchProperties" resultType="com.jiber.backend.property.PropertyListRow">
